@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 // Get one book by ID
 router.get('/:id', async (req, res) => {
   try {
-    const book = await Book.findByIdandget(req.params.id);
+    const book = await Book.findById(req.params.id);
     if (!book) return res.status(404).json({ message: 'Book not found' });
     res.json(book);
   } catch (err) {
@@ -23,8 +23,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create a book
-router.post('/', async (req, res) => {
+// Create a book (POST)
+router.post('/create', async (req, res) => {
   const book = new Book({
     title: req.body.title,
     author: req.body.author,
@@ -40,8 +40,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Update a book
-router.put('/:id', async (req, res) => {
+// Update a book (POST)
+router.post('/update/:id', async (req, res) => {
   try {
     const book = await Book.findByIdAndUpdate(req.params.id);
     if (!book) return res.status(404).json({ message: 'Book not found' });
@@ -59,8 +59,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete a book
-router.delete('/:id', async (req, res) => {
+// Delete a book (POST)
+router.post('/delete/:id', async (req, res) => {
   try {
     const book = await Book.findByIdAndDelete(req.params.id);
     if (!book) return res.status(404).json({ message: 'Book not found' });
