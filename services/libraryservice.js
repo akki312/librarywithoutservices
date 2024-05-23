@@ -36,6 +36,7 @@ async function getBookById(id) {
       throw new Error('Book not found');
     }
     
+
     if (!book.available) {
       throw new Error('Book is not available');
     }
