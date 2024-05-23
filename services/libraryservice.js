@@ -1,5 +1,9 @@
 // services/libraryService.js
 const Book = require('../models/book');
+const mongoose = require('mongoose');
+
+const objectId = require("mongodb").ObjectId;
+
 
 async function createBook(data) {
   const book = new Book(data);
@@ -31,19 +35,17 @@ async function getAllBooks() {
 
 async function getBookById(id) {
   try {
-    const book = await Book.findById(id);
-    if (!book) {
-      throw new Error('Book not found');
+    // const objectId = new mongoose.Types.ObjectId(id);
+    const book = await Book.findById({_id: new objectId(id),available:true});
+    if (book) {
+      return {message:'Book is available'};
     }
-    
-
-    if (!book.available) {
-      throw new Error('Book is not available');
+    else{
+      return {message:'Book not  available'}
     }
-
-    return book;
+     
   } catch (err) {
-    throw new Error(err.message);
+    throw err;
   }
 }
 

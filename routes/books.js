@@ -2,17 +2,17 @@ const express = require('express');
 const router = express.Router();
 const libraryService = require('../services/libraryservice');
 
-// Create a book (POST)
+//Create a book 
 router.post('/create', async (req, res) => {
   try {
     const newBook = await libraryService.createBook(req.body);
-    res.status(201).json(newBook);
+    res.status(200).json(newBook);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// Update a book (POST)
+// Update a book 
 router.post('/update/:id', async (req, res) => {
   try {
     const updatedBook = await libraryService.updateBook(req.params.id, req.body);
@@ -22,7 +22,7 @@ router.post('/update/:id', async (req, res) => {
   }
 });
 
-// Delete a book (POST)
+// Delete a book 
 router.post('/delete/:id', async (req, res) => {
   try {
     const result = await libraryService.deleteBook(req.params.id);
@@ -43,12 +43,13 @@ router.get('/', async (req, res) => {
 });
 
 // Get one book by ID
-router.get('/:id', async (req, res) => {
+router.get('/verifyBookById', async (req, res) => {
   try {
-    const book = await libraryService.getBookById(req.params.id);
-    res.json(book);
+    const data = await libraryService.getBookById(req.params.id);
+    res.status(200).send(data)
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
+
 module.exports = router;

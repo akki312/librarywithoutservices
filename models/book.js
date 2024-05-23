@@ -45,7 +45,7 @@ const bookSchema = new mongoose.Schema({
   availability: {
     type: Boolean,
     required: true,
-    default: null // Assume books are available by default
+    default: true // Assume books are available by default
   }
 });
 
