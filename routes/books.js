@@ -3,7 +3,7 @@ const router = express.Router();
 const libraryService = require('../services/libraryservice');
 
 //Create a book 
-router.post('/create', async (req, res) => {
+router.post('/insertbooks', async (req, res) => {
   try {
     const newBook = await libraryService.createBook(req.body);
     res.status(200).json(newBook);
@@ -13,7 +13,7 @@ router.post('/create', async (req, res) => {
 });
 
 // Update a book 
-router.post('/update/:id', async (req, res) => {
+router.post('/bookupdation/:id', async (req, res) => {
   try {
     const updatedBook = await libraryService.updateBook(req.params.id, req.body);
     res.json(updatedBook);
@@ -23,7 +23,7 @@ router.post('/update/:id', async (req, res) => {
 });
 
 // Delete a book 
-router.post('/delete/:id', async (req, res) => {
+router.post('/removalofbooks/:id', async (req, res) => {
   try {
     const result = await libraryService.deleteBook(req.params.id);
     res.json(result);
