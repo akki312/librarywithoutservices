@@ -1,6 +1,7 @@
 // services/borrowerservice.js
 
 const Borrower = require('../models/borrower');
+const Book = require('../models/book');
 
 async function createBorrower(borrowerData) {
   const borrower = new Borrower(borrowerData);
@@ -15,8 +16,37 @@ async function getAllBorrowers() {
   return await Borrower.find();
 }
 
+async function calculateFine(borrowerId, bookId) {
+  const borrower = await Borrower.findById(borrowerId).populate('borrowedBooks.book');
+  if (!borrower) {
+    throw new Error('Borrower not found');
+  }
+
+  const book = borrower.borrowedBooks.find(b => b.book._id.toString() === bookId);
+  if (!book) {
+    throw new Error('Book not found in borrower records');
+  }
+
+  const returnDate = book.dateReturn;
+  const currentDate = new Date();
+
+  const timeDiff = currentDate - returnDate;
+  const daysLate = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+  let fine = 0;
+  if (daysLate > 0) {
+    fine = daysLate * 1; // Assuming the fine is $1 per day late
+  }
+
+  book.fine = fine;
+  await borrower.save();
+
+  return fine;
+}
+
 module.exports = {
   createBorrower,
   getBorrowerById,
-  getAllBorrowers
+  getAllBorrowers,
+  calculateFine
 };

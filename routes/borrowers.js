@@ -37,4 +37,15 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Calculate fine for a borrower
+router.post('/calculate-fine', async (req, res) => {
+  try {
+    const { borrowerId, bookId } = req.body;
+    const fine = await borrowerService.calculateFine(borrowerId, bookId);
+    res.json({ borrowerId, bookId, fine });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
