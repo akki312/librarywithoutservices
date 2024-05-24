@@ -85,38 +85,37 @@ router.get('/count-books-by-author-and-category/:author', async (req, res) => {
 
 
 
-// Return a book (POST)
+
 router.post('/return/:id', async (req, res) => {
   try {
     const bookId = req.params.id;
-    const actualReturnDate = new Date(); // Get the current date as the actual return date
+    const actualReturnDate = new Date(); 
 
-    // Retrieve the book from the database
+    
     const book = await libraryService.getBookById(bookId);
     if (!book) {
       return res.status(404).json({ message: 'Book not found' });
     }
 
-    // Calculate the fine if the book is overdue
-    const fineRatePerDay = 10; // Fine rate is $10 per day (adjust as needed)
+    
+    const fineRatePerDay = 10; 
     const fineAmount = calculateFine(book.submissionDate, actualReturnDate, fineRatePerDay);
 
-    // Update the book's return status and fine amount
+   
     book.returned = true;
     book.actualReturnDate = actualReturnDate;
     book.fineAmount = fineAmount;
 
-    // Save the updated book information
+    
     const updatedBook = await book.save();
     
-    // Respond with the updated book and fine amount
+    
     res.json({ book: updatedBook, fineAmount });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// Function to calculate the fine
 function calculateFine(submissionDate, actualReturnDate, fineRatePerDay) {
   const submissionTimestamp = new Date(submissionDate).getTime();
   const actualReturnTimestamp = new Date(actualReturnDate).getTime();
@@ -124,13 +123,9 @@ function calculateFine(submissionDate, actualReturnDate, fineRatePerDay) {
   const differenceInDays = Math.ceil(differenceInMilliseconds / (1000 * 60 * 60 * 24));
   
   if (differenceInDays <= 0) {
-    return 0; // No fine if returned on or before submission date
+    return 0; 
   } else {
     return differenceInDays * fineRatePerDay;
   }
 }
-
-module.exports = router;
-
-
 module.exports = router;

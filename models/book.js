@@ -11,7 +11,7 @@ const bookSchema = new Schema({
   dateReturn: { type: Date },
   timeOfTaken: { type: String },
   timeOfReturn: { type: String },
-  personName: { type: String },  // You might want to remove this if you are using borrower reference
+ 
   availability: { type: Boolean, default: true },
   category: { type: String, required: true },
   borrower: { type: Schema.Types.ObjectId, ref: 'Borrower' },  // Add reference to Borrower
