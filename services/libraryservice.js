@@ -78,7 +78,7 @@ async function countBooksByAuthorAndCategory(author) {
 function calculateFine(dateTaken, dateReturn) {
   const fineRate = 1; // Define the fine rate per day
   const borrowDuration = (new Date(dateReturn) - new Date(dateTaken)) / (1000 * 60 * 60 * 24);
-  return Math.max(0, Math.ceil(borrowDuration - 14) * fineRate); // Assuming 14 days grace period
+  return Math.max(0, Math.ceil(borrowDuration - 7) * fineRate); // Assuming 14 days grace period
 }
 
 module.exports = {

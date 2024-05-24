@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const borrowerService = require('../services/borrowerservice');
+const borrowerSchema = require('../models/borrower');
 
 // Create a borrower (POST)
 router.post('/create', async (req, res) => {
