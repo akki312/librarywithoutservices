@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const bookRouter = require('./routes/books');
-const borroweRouter = require('./routes/borrowers');
+const borrowerRouter = require('./routes/borrowers');
 const dotenv = require('dotenv');
 //require('dotenv').config(); 
 
@@ -23,7 +23,7 @@ mongoose.connect('mongodb+srv://akshithsistla:ccipnWsoxp5NQ0nm@cluster0.iljkeyx.
 
 
 app.use('/books',bookRouter);
-app.use('/borrowers',borroweRouter);
+app.use('/borrowers',borrowerRouter);
 
 
 const PORT = 3009;
