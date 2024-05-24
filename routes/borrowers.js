@@ -1,7 +1,8 @@
+// routes/borrower.js
+
 const express = require('express');
 const router = express.Router();
 const borrowerService = require('../services/borrowerservice');
-const borrowerSchema = require('../models/borrower');
 
 // Create a borrower (POST)
 router.post('/create', async (req, res) => {
@@ -21,6 +22,16 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Borrower not found' });
     }
     res.json(borrower);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get all borrowers
+router.get('/', async (req, res) => {
+  try {
+    const borrowers = await borrowerService.getAllBorrowers();
+    res.json(borrowers);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

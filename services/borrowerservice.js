@@ -1,23 +1,22 @@
+// services/borrowerservice.js
+
 const Borrower = require('../models/borrower');
 
 async function createBorrower(borrowerData) {
-  try {
-    const borrower = new Borrower(borrowerData);
-    return await borrower.save();
-  } catch (error) {
-    throw new Error('Could not create borrower: ' + error.message);
-  }
+  const borrower = new Borrower(borrowerData);
+  return await borrower.save();
 }
 
 async function getBorrowerById(id) {
-  try {
-    return await Borrower.findById(id);
-  } catch (error) {
-    throw new Error('Could not find borrower: ' + error.message);
-  }
+  return await Borrower.findById(id);
+}
+
+async function getAllBorrowers() {
+  return await Borrower.find();
 }
 
 module.exports = {
   createBorrower,
-  getBorrowerById
+  getBorrowerById,
+  getAllBorrowers
 };
