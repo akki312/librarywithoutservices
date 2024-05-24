@@ -2,35 +2,18 @@ const express = require('express');
 const router = express.Router();
 const libraryService = require('../services/libraryservice');
 
-router.get('/count-books-by-author/:author', async (req, res) => {
-  try {
-    const authorName = req.params.author;
-    const count = await libraryService.countBooksByAuthor(authorName);
-    res.json({ author: authorName, count: count });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-
-
-
-
-
-
-
-//Create a book 
-router.post('/insertbooks', async (req, res) => {
+// Create a book (POST)
+router.post('/create', async (req, res) => {
   try {
     const newBook = await libraryService.createBook(req.body);
-    res.status(200).json(newBook);
+    res.status(201).json(newBook);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// Update a book 
-router.post('/bookupdation/:id', async (req, res) => {
+// Update a book (POST)
+router.post('/update/:id', async (req, res) => {
   try {
     const updatedBook = await libraryService.updateBook(req.params.id, req.body);
     res.json(updatedBook);
@@ -39,8 +22,8 @@ router.post('/bookupdation/:id', async (req, res) => {
   }
 });
 
-// Delete a book 
-router.post('/removalofbooks/:id', async (req, res) => {
+// Delete a book (POST)
+router.post('/delete/:id', async (req, res) => {
   try {
     const result = await libraryService.deleteBook(req.params.id);
     res.json(result);
@@ -60,10 +43,20 @@ router.get('/', async (req, res) => {
 });
 
 // Get one book by ID
-router.get('/verifyBookById', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    const data = await libraryService.getBookById(req.params.id);
-    res.status(200).send(data)
+    const book = await libraryService.getBookById(req.params.id);
+    res.json(book);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Count books by author
+router.get('/count-books-by-author/:author', async (req, res) => {
+  try {
+    const count = await libraryService.countBooksByAuthor(req.params.author);
+    res.json({ author: req.params.author, totalBooks: count });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

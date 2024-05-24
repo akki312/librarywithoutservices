@@ -1,92 +1,55 @@
-const Library = require('../models/library');
+// services/libraryservice.js
 
-async function countBooksByAuthor(authorName) {
-  try {
-    const count = await Book.countDocuments({ author: authorName });
-    return count;
-  } catch (err) {
-    throw new Error(err.message);
-  }
+const Book = require('../models/book');
+
+async function createBook(data) {
+  const book = new Book(data);
+  return await book.save();
 }
 
-async function createLibrary(libraryData) {
-  const library = new Library(libraryData);
-  return await library.save();
-}
-
-async function addBookToLibrary(libraryId, bookData) {
-  const library = await Library.findById(libraryId);
-  if (!library) {
-    throw new Error('Library not found');
-  }
-
-  library.books.push(bookData);
-  return await library.save();
-}
-
-async function getLibraryById(id) {
-  const library = await Library.findById(id);
-  if (!library) {
-    throw new Error('Library not found');
-  }
-  return library;
-}
-
-async function updateLibraryBook(libraryId, bookId, bookData) {
-  const library = await Library.findById(libraryId);
-  if (!library) {
-    throw new Error('Library not found');
-  }
-
-  const book = library.books.id(bookId);
+async function updateBook(id, data) {
+  const book = await Book.findById(id);
   if (!book) {
-    throw new Error('Book not found in library');
+    throw new Error('Book not found');
   }
-
-  Object.assign(book, bookData);
-  return await library.save();
+  
+  Object.assign(book, data);
+  return await book.save();
 }
 
-async function deleteLibraryBook(libraryId, bookId) {
-  const library = await Library.findById(libraryId);
-  if (!library) {
-    throw new Error('Library not found');
+async function deleteBook(id) {
+  const book = await Book.findByIdAndDelete(id);
+  if (!book) {
+    throw new Error('Book not found');
   }
-
-  library.books.id(bookId).remove();
-  return await library.save();
+  return { message: 'Book deleted' };
 }
 
-module.exports = {
-  countBooksByAuthor,
-  createLibrary,
-  addBookToLibrary,
-  getLibraryById,
-  updateLibraryBook,
-  deleteLibraryBook
-};
+async function getAllBooks() {
+  return await Book.find();
+}
 
 async function getBookById(id) {
-  try {
-    // const objectId = new mongoose.Types.ObjectId(id);
-    const book = await Book.findById({_id: new objectId(id),available:true});
-    if (book) {
-      return {message:'Book is available'};
-    }
-    else{
-      return {message:'Book not  available'}
-    }
-     
-  } catch (err) {
-    throw err;
+  const book = await Book.findById(id);
+  if (!book) {
+    throw new Error('Book not found');
   }
+  return book;
 }
 
+async function countBooksByAuthor(author) {
+  const count = await Book.aggregate([
+    { $match: { author } },
+    { $count: "totalBooks" }
+  ]);
+  return count.length ? count[0].totalBooks : 0;
+}
 
 module.exports = {
-  createLibrary,
-  addBookToLibrary,
-  getLibraryById,
-  updateLibraryBook,
-  deleteLibraryBook
+  createBook,
+  updateBook,
+  deleteBook,
+  getAllBooks,
+  getBookById,
+  countBooksByAuthor
 };
