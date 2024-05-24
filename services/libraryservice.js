@@ -13,6 +13,13 @@ async function updateBook(id, updateData) {
   }
 
   Object.assign(book, updateData);
+
+  // Calculate fine if dateReturn and dateTaken are present
+  if (book.dateTaken && book.dateReturn) {
+    const fine = calculateFine(book.dateTaken, book.dateReturn);
+    book.fine = fine;
+  }
+
   return await book.save();
 }
 
@@ -68,6 +75,12 @@ async function countBooksByAuthorAndCategory(author) {
   ]);
 }
 
+function calculateFine(dateTaken, dateReturn) {
+  const fineRate = 1; // Define the fine rate per day
+  const borrowDuration = (new Date(dateReturn) - new Date(dateTaken)) / (1000 * 60 * 60 * 24);
+  return Math.max(0, Math.ceil(borrowDuration - 14) * fineRate); // Assuming 14 days grace period
+}
+
 module.exports = {
   createBook,
   updateBook,
@@ -76,5 +89,6 @@ module.exports = {
   getBookById,
   countBooksByAuthor,
   getBooksAndCountByAuthor,
-  countBooksByAuthorAndCategory
+  countBooksByAuthorAndCategory,
+  calculateFine
 };

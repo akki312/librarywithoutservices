@@ -14,7 +14,8 @@ const bookSchema = new Schema({
   personName: { type: String },  // You might want to remove this if you are using borrower reference
   availability: { type: Boolean, default: true },
   category: { type: String, required: true },
-  borrower: { type: Schema.Types.ObjectId, ref: 'Borrower' }  // Add reference to Borrower
+  borrower: { type: Schema.Types.ObjectId, ref: 'Borrower' },  // Add reference to Borrower
+  fine: { type: Number, default: 0 }  // Add field for fine
 });
 
 module.exports = mongoose.model('Book', bookSchema);
