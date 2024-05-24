@@ -1,19 +1,18 @@
-// services/libraryservice.js
-
 const Book = require('../models/book');
+const Borrower = require('../models/borrower');
 
-async function createBook(data) {
-  const book = new Book(data);
+async function createBook(bookData) {
+  const book = new Book(bookData);
   return await book.save();
 }
 
-async function updateBook(id, data) {
+async function updateBook(id, updateData) {
   const book = await Book.findById(id);
   if (!book) {
     throw new Error('Book not found');
   }
-  
-  Object.assign(book, data);
+
+  Object.assign(book, updateData);
   return await book.save();
 }
 
@@ -26,23 +25,47 @@ async function deleteBook(id) {
 }
 
 async function getAllBooks() {
-  return await Book.find();
+  return await Book.find().populate('borrower');  // Populate borrower details
 }
 
 async function getBookById(id) {
-  const book = await Book.findById(id);
+  const book = await Book.findById(id).populate('borrower');  // Populate borrower details
   if (!book) {
     throw new Error('Book not found');
+  }
+  if (!book.availability) {
+    throw new Error('Book is not available');
   }
   return book;
 }
 
 async function countBooksByAuthor(author) {
-  const count = await Book.aggregate([
+  return await Book.countDocuments({ author });
+}
+
+async function getBooksAndCountByAuthor(author) {
+  const books = await Book.find({ author }).populate('borrower');
+  const count = books.length;
+  return { books, count };
+}
+
+async function countBooksByAuthorAndCategory(author) {
+  return await Book.aggregate([
     { $match: { author } },
-    { $count: "totalBooks" }
+    {
+      $group: {
+        _id: '$category',
+        count: { $sum: 1 }
+      }
+    },
+    {
+      $project: {
+        category: '$_id',
+        count: 1,
+        _id: 0
+      }
+    }
   ]);
-  return count.length ? count[0].totalBooks : 0;
 }
 
 module.exports = {
@@ -51,5 +74,7 @@ module.exports = {
   deleteBook,
   getAllBooks,
   getBookById,
-  countBooksByAuthor
+  countBooksByAuthor,
+  getBooksAndCountByAuthor,
+  countBooksByAuthorAndCategory
 };

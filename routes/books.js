@@ -56,7 +56,27 @@ router.get('/:id', async (req, res) => {
 router.get('/count-books-by-author/:author', async (req, res) => {
   try {
     const count = await libraryService.countBooksByAuthor(req.params.author);
-    res.json({ author: req.params.author, totalBooks: count });
+    res.json({ author: req.params.author, count: count });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get books and count by author
+router.get('/books-and-count-by-author/:author', async (req, res) => {
+  try {
+    const { books, count } = await libraryService.getBooksAndCountByAuthor(req.params.author);
+    res.json({ author: req.params.author, count: count, books: books });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Count books by author and category
+router.get('/count-books-by-author-and-category/:author', async (req, res) => {
+  try {
+    const result = await libraryService.countBooksByAuthorAndCategory(req.params.author);
+    res.json({ author: req.params.author, categories: result });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
