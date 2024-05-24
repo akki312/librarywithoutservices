@@ -2,6 +2,23 @@ const express = require('express');
 const router = express.Router();
 const libraryService = require('../services/libraryservice');
 
+router.get('/count-books-by-author/:author', async (req, res) => {
+  try {
+    const authorName = req.params.author;
+    const count = await libraryService.countBooksByAuthor(authorName);
+    res.json({ author: authorName, count: count });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+
+
+
+
+
+
 //Create a book 
 router.post('/insertbooks', async (req, res) => {
   try {

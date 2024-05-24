@@ -1,37 +1,70 @@
-// services/libraryService.js
-const Book = require('../models/book');
-const mongoose = require('mongoose');
+const Library = require('../models/library');
 
-const objectId = require("mongodb").ObjectId;
-
-
-async function createBook(data) {
-  const book = new Book(data);
-  return await book.save();
+async function countBooksByAuthor(authorName) {
+  try {
+    const count = await Book.countDocuments({ author: authorName });
+    return count;
+  } catch (err) {
+    throw new Error(err.message);
+  }
 }
 
-async function updateBook(id, data) {
-  const book = await Book.findById(id);
-  if (!book) throw new Error('Book not found');
+async function createLibrary(libraryData) {
+  const library = new Library(libraryData);
+  return await library.save();
+}
 
-  for (const key in data) {
-    if (data.hasOwnProperty(key)) {
-      book[key] = data[key];
-    }
+async function addBookToLibrary(libraryId, bookData) {
+  const library = await Library.findById(libraryId);
+  if (!library) {
+    throw new Error('Library not found');
   }
 
-  return await book.save();
+  library.books.push(bookData);
+  return await library.save();
 }
 
-async function deleteBook(id) {
-  const book = await Book.findByIdAndDelete(id);
-  if (!book) throw new Error('Book not found');
-  return { message: 'Book deleted' };
+async function getLibraryById(id) {
+  const library = await Library.findById(id);
+  if (!library) {
+    throw new Error('Library not found');
+  }
+  return library;
 }
 
-async function getAllBooks() {
-  return await Book.find();
+async function updateLibraryBook(libraryId, bookId, bookData) {
+  const library = await Library.findById(libraryId);
+  if (!library) {
+    throw new Error('Library not found');
+  }
+
+  const book = library.books.id(bookId);
+  if (!book) {
+    throw new Error('Book not found in library');
+  }
+
+  Object.assign(book, bookData);
+  return await library.save();
 }
+
+async function deleteLibraryBook(libraryId, bookId) {
+  const library = await Library.findById(libraryId);
+  if (!library) {
+    throw new Error('Library not found');
+  }
+
+  library.books.id(bookId).remove();
+  return await library.save();
+}
+
+module.exports = {
+  countBooksByAuthor,
+  createLibrary,
+  addBookToLibrary,
+  getLibraryById,
+  updateLibraryBook,
+  deleteLibraryBook
+};
 
 async function getBookById(id) {
   try {
@@ -51,9 +84,9 @@ async function getBookById(id) {
 
 
 module.exports = {
-  createBook,
-  updateBook,
-  deleteBook,
-  getAllBooks,
-  getBookById
+  createLibrary,
+  addBookToLibrary,
+  getLibraryById,
+  updateLibraryBook,
+  deleteLibraryBook
 };
