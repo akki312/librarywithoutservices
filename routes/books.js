@@ -32,21 +32,21 @@ router.post('/delete/:id', async (req, res) => {
   }
 });
 
-// Get all books
-router.get('/', async (req, res) => {
-  try {
-    const books = await libraryService.getAllBooks();
-    res.json(books);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
 // Get one book by ID
 router.get('/:id', async (req, res) => {
   try {
     const book = await libraryService.getBookById(req.params.id);
     res.json(book);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get all books
+router.get('/', async (req, res) => {
+  try {
+    const books = await libraryService.getAllBooks();
+    res.json(books);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -58,7 +58,7 @@ router.get('/count-books-by-author/:author', async (req, res) => {
     const count = await libraryService.countBooksByAuthor(req.params.author);
     res.json({ author: req.params.author, count: count });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(404).json({ message: 'Author not found or has no books' });
   }
 });
 
@@ -68,7 +68,7 @@ router.get('/books-and-count-by-author/:author', async (req, res) => {
     const { books, count } = await libraryService.getBooksAndCountByAuthor(req.params.author);
     res.json({ author: req.params.author, count: count, books: books });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(404).json({ message: 'Author not found or has no books' });
   }
 });
 
@@ -78,7 +78,7 @@ router.get('/count-books-by-author-and-category/:author', async (req, res) => {
     const result = await libraryService.countBooksByAuthorAndCategory(req.params.author);
     res.json({ author: req.params.author, categories: result });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(404).json({ message: 'Author not found or has no books' });
   }
 });
 

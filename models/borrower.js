@@ -7,4 +7,4 @@ const borrowerSchema = new Schema({
   email: { type: String, required: true }
 });
 
-module.exports = mongoose.model('Borrower', borrowerSchema);
+module.exports = mongoose.model('borrower', borrowerSchema);

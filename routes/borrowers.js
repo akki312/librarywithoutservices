@@ -16,6 +16,9 @@ router.post('/create', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const borrower = await borrowerService.getBorrowerById(req.params.id);
+    if (!borrower) {
+      return res.status(404).json({ message: 'Borrower not found' });
+    }
     res.json(borrower);
   } catch (err) {
     res.status(500).json({ message: err.message });
