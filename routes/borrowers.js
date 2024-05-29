@@ -1,10 +1,10 @@
 // routes/borrower.js
-
+const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const borrowerService = require('../services/borrowerservice');
 
-// Create a borrower (POST)
+
 // Create a borrower (POST)
 router.post('/create', async (req, res) => {
   // Extract borrowerId from the request body
@@ -62,7 +62,7 @@ router.post('/calculate-fine', async (req, res) => {
 
 
 // Update a borrower by ID
-router.post('/:id', async (req, res) => {
+router.post('/update/:id', async (req, res) => {
   try {
     const updatedBorrower = await borrowerService.updateBorrower(req.params.id, req.body);
     res.json(updatedBorrower);
