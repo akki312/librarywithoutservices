@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const borrowerService = require('../services/borrowerservice');
-
+const Borrower = require('../models/borrower');
 
 // Create a borrower (POST)
 router.post('/create', async (req, res) => {
@@ -14,7 +14,6 @@ router.post('/create', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-
 
 // Get a borrower by ID
 router.get('/:id', async (req, res) => {
@@ -50,10 +49,6 @@ router.post('/calculate-fine', async (req, res) => {
   }
 });
 
-
-
-
-
 // Update a borrower by ID
 router.post('/update/:id', async (req, res) => {
   try {
@@ -61,6 +56,34 @@ router.post('/update/:id', async (req, res) => {
     res.json(updatedBorrower);
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+});
+
+// Add a borrowed book to a borrower
+router.post('/:id/borrow-book', async (req, res) => {
+  try {
+    const borrowerId = req.params.id;
+    const { bookId } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(borrowerId)) {
+      return res.status(400).json({ message: 'Invalid borrower ID' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(bookId)) {
+      return res.status(400).json({ message: 'Invalid book ID' });
+    }
+
+    const borrower = await Borrower.findById(borrowerId);
+    if (!borrower) {
+      return res.status(404).json({ message: 'Borrower not found' });
+    }
+
+    borrower.borrowedBooks.push(bookId);
+    await borrower.save();
+
+    res.json(borrower);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
