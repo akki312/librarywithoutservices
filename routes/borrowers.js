@@ -7,14 +7,6 @@ const borrowerService = require('../services/borrowerservice');
 
 // Create a borrower (POST)
 router.post('/create', async (req, res) => {
-  // Extract borrowerId from the request body
-  const { borrowerId } = req.body;
-
-  // Validate borrowerId
-  if (!mongoose.Types.ObjectId.isValid(borrowerId)) {
-    return res.status(400).json({ message: 'Invalid borrower ID' });
-  }
-
   try {
     const newBorrower = await borrowerService.createBorrower(req.body);
     res.status(201).json(newBorrower);
@@ -22,6 +14,7 @@ router.post('/create', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+
 
 // Get a borrower by ID
 router.get('/:id', async (req, res) => {
