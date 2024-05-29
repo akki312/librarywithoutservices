@@ -48,8 +48,6 @@ async function calculateFine(borrowerId, bookId) {
   return fine;
 }
 
-
-
 async function updateBorrower(id, updatedData) {
   try {
     const borrower = await Borrower.findByIdAndUpdate(id, updatedData, { new: true });
@@ -78,9 +76,6 @@ async function checkInBook(borrowerId, bookId) {
   await borrower.save();
   return borrower;
 }
-
-
-
 
 
 module.exports = {
