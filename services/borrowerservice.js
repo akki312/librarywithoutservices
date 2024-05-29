@@ -49,9 +49,25 @@ async function calculateFine(borrowerId, bookId) {
   return fine;
 }
 
+
+
+async function updateBorrower(id, updatedData) {
+  try {
+    const borrower = await Borrower.findByIdAndUpdate(id, updatedData, { new: true });
+    if (!borrower) {
+      throw new Error('Borrower not found');
+    }
+    return borrower;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+
 module.exports = {
   createBorrower,
   getBorrowerById,
   getAllBorrowers,
-  calculateFine
+  calculateFine,
+  updateBorrower
 };
