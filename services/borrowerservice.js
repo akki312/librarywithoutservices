@@ -2,12 +2,17 @@
 
 const Borrower = require('../models/borrower');
 const Book = require('../models/book');
+const sendBorrowerEmail = require('../utils/sendemail');
 
 async function createBorrower(borrowerData) {
   const borrower = new Borrower(borrowerData);
-  return await borrower.save();
+  await borrower.save();
+  
+  // Send an email notification to the borrower with date and time details
+  sendBorrowerEmail(borrower.email, borrower.bookTitle, borrower.dateTaken, borrower.timeTaken);
+  
+  return borrower;
 }
-
 async function getBorrowerById(id) {
   return await Borrower.findById(id);
 }
