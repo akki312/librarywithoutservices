@@ -87,4 +87,24 @@ router.post('/:id/borrow-book', async (req, res) => {
   }
 });
 
+router.post('/:id/checkin-book', async (req, res) => {
+  try {
+    const borrowerId = req.params.id;
+    const { bookId } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(borrowerId)) {
+      return res.status(400).json({ message: 'Invalid borrower ID' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(bookId)) {
+      return res.status(400).json({ message: 'Invalid book ID' });
+    }
+
+    const borrower = await borrowerService.checkInBook(borrowerId, bookId);
+    res.json(borrower);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

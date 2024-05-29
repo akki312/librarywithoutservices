@@ -62,11 +62,32 @@ async function updateBorrower(id, updatedData) {
   }
 }
 
+async function checkInBook(borrowerId, bookId) {
+  const borrower = await Borrower.findById(borrowerId);
+  if (!borrower) {
+    throw new Error('Borrower not found');
+  }
+
+  const bookIndex = borrower.borrowedBooks.indexOf(bookId);
+  if (bookIndex > -1) {
+    borrower.borrowedBooks.splice(bookIndex, 1); // Remove the book from the array
+  } else {
+    throw new Error('Book not found in borrowed books');
+  }
+
+  await borrower.save();
+  return borrower;
+}
+
+
+
+
 
 module.exports = {
   createBorrower,
   getBorrowerById,
   getAllBorrowers,
   calculateFine,
-  updateBorrower
+  updateBorrower,
+  checkInBook
 };
