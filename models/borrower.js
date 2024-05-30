@@ -12,6 +12,7 @@ const borrowerSchema = new mongoose.Schema({
       ref: 'Book'
     }
   ]
+  
 });
 
 module.exports = mongoose.model('Borrower', borrowerSchema);
