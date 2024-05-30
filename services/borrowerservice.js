@@ -77,6 +77,25 @@ async function checkInBook(borrowerId, bookId) {
   return borrower;
 }
 
+async function assignBookToBorrower(borrowerId, bookId) {
+  const borrower = await Borrower.findById(borrowerId);
+  const book = await Book.findById(bookId);
+
+  if (!borrower) {
+    throw new Error('Borrower not found');
+  }
+
+  if (!book) {
+    throw new Error('Book not found');
+  }
+
+  borrower.borrowedBooks.push(bookId);
+  await borrower.save();
+  return borrower;
+}
+
+
+
 
 module.exports = {
   createBorrower,
@@ -84,5 +103,6 @@ module.exports = {
   getAllBorrowers,
   calculateFine,
   updateBorrower,
-  checkInBook
+  checkInBook,
+  assignBookToBorrower
 };
