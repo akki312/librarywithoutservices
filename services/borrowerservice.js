@@ -7,7 +7,8 @@ async function createBorrower(borrowerData) {
   const borrower = new Borrower(borrowerData);
   await borrower.save();
   
- 
+  // Send an email notification to the borrower with date and time details
+  sendBorrowerEmail(borrower.email, borrower.bookTitle, borrower.dateTaken, borrower.timeTaken);
   
   return borrower;
 }
@@ -87,9 +88,6 @@ async function assignBookToBorrower(borrowerId, bookId) {
   if (!book) {
     throw new Error('Book not found');
   }
-   
- // Send an email notification to the borrower with date and time details
- sendBorrowerEmail(borrower.email, borrower.bookTitle, borrower.dateTaken, borrower.timeTaken);
 
   borrower.borrowedBooks.push(bookId);
   await borrower.save();
