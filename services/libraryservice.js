@@ -8,7 +8,7 @@ async function fnccreateBook(bookData) {
     const savedBook = await book.save();
     return savedBook;
   } catch (error) {
-    throw error;
+    throw new Error(`Error creating book: ${error.message}`);
   }
 }
 
@@ -29,7 +29,7 @@ async function fncupdateBook(id, updateData) {
     const updatedBook = await book.save();
     return updatedBook;
   } catch (error) {
-    throw error;
+    throw new Error(`Error updating book: ${error.message}`);
   }
 }
 
@@ -42,7 +42,7 @@ async function fncdeleteBook(id) {
 
     return { message: 'Book deleted' };
   } catch (error) {
-    throw error;
+    throw new Error(`Error deleting book: ${error.message}`);
   }
 }
 
@@ -57,7 +57,7 @@ async function fncgetAllBooks(page = 1, limit = 10, sort = 'title') {
     const totalBooks = await Book.countDocuments();
     return { books, totalBooks, currentPage: page, totalPages: Math.ceil(totalBooks / limit) };
   } catch (error) {
-    throw error;
+    throw new Error(`Error fetching all books: ${error.message}`);
   }
 }
 
@@ -73,7 +73,7 @@ async function fncgetBookById(id) {
 
     return book;
   } catch (error) {
-    throw error;
+    throw new Error(`Error fetching book by ID: ${error.message}`);
   }
 }
 
@@ -81,7 +81,7 @@ async function fnccountBooksByAuthor(author) {
   try {
     return await Book.countDocuments({ author });
   } catch (error) {
-    throw error;
+    throw new Error(`Error counting books by author: ${error.message}`);
   }
 }
 
@@ -96,7 +96,7 @@ async function fncgetBooksAndCountByAuthor(author, page = 1, limit = 10, sort = 
     const count = await Book.countDocuments({ author });
     return { books, count, currentPage: page, totalPages: Math.ceil(count / limit) };
   } catch (error) {
-    throw error;
+    throw new Error(`Error fetching books and count by author: ${error.message}`);
   }
 }
 
@@ -119,7 +119,7 @@ async function fnccountBooksByAuthorAndCategory(author) {
       }
     ]);
   } catch (error) {
-    throw error;
+    throw new Error(`Error counting books by author and category: ${error.message}`);
   }
 }
 
@@ -131,7 +131,7 @@ async function fncupdateOneBook(filter, updateData) {
     }
     return updatedBook;
   } catch (error) {
-    throw error;
+    throw new Error(`Error updating book with filter: ${error.message}`);
   }
 }
 
@@ -140,7 +140,7 @@ async function fncupdateManyBooks(filter, updateData) {
     const result = await Book.updateMany(filter, updateData);
     return { message: `${result.nModified} book(s) updated` };
   } catch (error) {
-    throw error;
+    throw new Error(`Error updating books with filter: ${error.message}`);
   }
 }
 
