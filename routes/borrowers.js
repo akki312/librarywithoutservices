@@ -1,135 +1,81 @@
-// routes/borrower.js
-const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const borrowerService = require('../services/borrowerservice');
-const Borrower = require('../models/borrower');
 
-// Create a borrower (POST)
-router.post('/create', async (req, res) => {
+// Create a new borrower
+router.post('/', async (req, res) => {
   try {
-    const newBorrower = await borrowerService.createBorrower(req.body);
-    res.status(201).json(newBorrower);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+    const borrower = await borrowerService.fnccreateBorrower(req.body);
+    res.status(201).json(borrower);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
-// Get a borrower by ID
+// Get borrower by ID
 router.get('/:id', async (req, res) => {
   try {
-    const borrower = await borrowerService.getBorrowerById(req.params.id);
+    const borrower = await borrowerService.fncgetBorrowerById(req.params.id);
     if (!borrower) {
       return res.status(404).json({ message: 'Borrower not found' });
     }
     res.json(borrower);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
 // Get all borrowers
 router.get('/', async (req, res) => {
   try {
-    const borrowers = await borrowerService.getAllBorrowers();
+    const borrowers = await borrowerService.fncgetAllBorrowers();
     res.json(borrowers);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update a borrower
+router.put('/:id', async (req, res) => {
+  try {
+    const borrower = await borrowerService.fncupdateBorrower(req.params.id, req.body);
+    if (!borrower) {
+      return res.status(404).json({ message: 'Borrower not found' });
+    }
+    res.json(borrower);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Assign a book to a borrower
+router.post('/:borrowerId/assign/:bookId', async (req, res) => {
+  try {
+    const borrower = await borrowerService.fncassignBookToBorrower(req.params.borrowerId, req.params.bookId);
+    res.json(borrower);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Check in a book
+router.post('/:borrowerId/checkin/:bookId', async (req, res) => {
+  try {
+    const borrower = await borrowerService.fnccheckInBook(req.params.borrowerId, req.params.bookId);
+    res.json(borrower);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
 // Calculate fine for a borrower
-router.post('/calculate-fine', async (req, res) => {
+router.get('/:borrowerId/fine/:bookId', async (req, res) => {
   try {
-    const { borrowerId, bookId } = req.body;
-    const fine = await borrowerService.calculateFine(borrowerId, bookId);
-    res.json({ borrowerId, bookId, fine });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const fine = await borrowerService.fnccalculateFine(req.params.borrowerId, req.params.bookId);
+    res.json({ fine });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
-
-// Update a borrower by ID
-router.post('/update/:id', async (req, res) => {
-  try {
-    const updatedBorrower = await borrowerService.updateBorrower(req.params.id, req.body);
-    res.json(updatedBorrower);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Add a borrowed book to a borrower
-router.post('/:id/borrow-book', async (req, res) => {
-  try {
-    const borrowerId = req.params.id;
-    const { bookId } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(borrowerId)) {
-      return res.status(400).json({ message: 'Invalid borrower ID' });
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(bookId)) {
-      return res.status(400).json({ message: 'Invalid book ID' });
-    }
-
-    const borrower = await Borrower.findById(borrowerId);
-    if (!borrower) {
-      return res.status(404).json({ message: 'Borrower not found' });
-    }
-
-    borrower.borrowedBooks.push(bookId);
-    await borrower.save();
-
-    res.json(borrower);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-router.post('/:id/checkin-book', async (req, res) => {
-  try {
-    const borrowerId = req.params.id;
-    const { bookId } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(borrowerId)) {
-      return res.status(400).json({ message: 'Invalid borrower ID' });
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(bookId)) {
-      return res.status(400).json({ message: 'Invalid book ID' });
-    }
-
-    const borrower = await borrowerService.checkInBook(borrowerId, bookId);
-    res.json(borrower);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-router.post('/:id/assign-book', async (req, res) => {
-  try {
-    const borrowerId = req.params.id;
-    const { bookId } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(borrowerId)) {
-      return res.status(400).json({ message: 'Invalid borrower ID' });
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(bookId)) {
-      return res.status(400).json({ message: 'Invalid book ID' });
-    }
-
-    const updatedBorrower = await borrowerService.assignBookToBorrower(borrowerId, bookId);
-    res.json(updatedBorrower);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-
-
-
-
 
 module.exports = router;
