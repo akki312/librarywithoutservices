@@ -93,16 +93,6 @@ async function fncassignBookToBorrower(borrowerId, bookId) {
   await borrower.save();
   return borrower;
 }
-
-
-
-
-
-
-
-
-
-
 module.exports = {
   fnccreateBorrower,
   fncgetBorrowerById,
