@@ -3,7 +3,7 @@ const Borrower = require('../models/borrower');
 const Book = require('../models/book');
 const sendBorrowerEmail = require('../utils/sendemail');
 
-async function createBorrower(borrowerData) {
+async function fnccreateBorrower(borrowerData) {
   const borrower = new Borrower(borrowerData);
   await borrower.save();
   
@@ -12,15 +12,15 @@ async function createBorrower(borrowerData) {
   
   return borrower;
 }
-async function getBorrowerById(id) {
+async function fncgetBorrowerById(id) {
   return await Borrower.findById(id);
 }
 
-async function getAllBorrowers() {
+async function fncgetAllBorrowers() {
   return await Borrower.find();
 }
 
-async function calculateFine(borrowerId, bookId) {
+async function fnccalculateFine(borrowerId, bookId) {
   const borrower = await Borrower.findById(borrowerId).populate('borrowedBooks.book');
   if (!borrower) {
     throw new Error('Borrower not found');
@@ -48,7 +48,7 @@ async function calculateFine(borrowerId, bookId) {
   return fine;
 }
 
-async function updateBorrower(id, updatedData) {
+async function fncupdateBorrower(id, updatedData) {
   try {
     const borrower = await Borrower.findByIdAndUpdate(id, updatedData, { new: true });
     if (!borrower) {
@@ -60,7 +60,7 @@ async function updateBorrower(id, updatedData) {
   }
 }
 
-async function checkInBook(borrowerId, bookId) {
+async function fnccheckInBook(borrowerId, bookId) {
   const borrower = await Borrower.findById(borrowerId);
   if (!borrower) {
     throw new Error('Borrower not found');
@@ -77,7 +77,7 @@ async function checkInBook(borrowerId, bookId) {
   return borrower;
 }
 
-async function assignBookToBorrower(borrowerId, bookId) {
+async function fncassignBookToBorrower(borrowerId, bookId) {
   const borrower = await Borrower.findById(borrowerId);
   const book = await Book.findById(bookId);
 
@@ -104,11 +104,11 @@ async function assignBookToBorrower(borrowerId, bookId) {
 
 
 module.exports = {
-  createBorrower,
-  getBorrowerById,
-  getAllBorrowers,
-  calculateFine,
-  updateBorrower,
-  checkInBook,
-  assignBookToBorrower
+  fnccreateBorrower,
+  fncgetBorrowerById,
+  fncgetAllBorrowers,
+  fnccalculateFine,
+  fncupdateBorrower,
+  fnccheckInBook,
+  fncassignBookToBorrower
 };
