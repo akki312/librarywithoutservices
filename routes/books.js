@@ -45,7 +45,8 @@ router.get('/:id', async (req, res) => {
 // Get all books
 router.get('/', async (req, res) => {
   try {
-    const books = await libraryService.getAllBooks();
+    const { page = 1, limit = 10, sort = 'title' } = req.query;
+    const books = await libraryService.getAllBooks(page, limit, sort);
     res.json(books);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -56,7 +57,7 @@ router.get('/', async (req, res) => {
 router.get('/count-books-by-author/:author', async (req, res) => {
   try {
     const count = await libraryService.countBooksByAuthor(req.params.author);
-    res.json({ author: req.params.author, count: count });
+    res.json({ author: req.params.author, count });
   } catch (err) {
     res.status(404).json({ message: 'Author not found or has no books' });
   }
@@ -65,8 +66,9 @@ router.get('/count-books-by-author/:author', async (req, res) => {
 // Get books and count by author
 router.get('/books-and-count-by-author/:author', async (req, res) => {
   try {
-    const { books, count } = await libraryService.getBooksAndCountByAuthor(req.params.author);
-    res.json({ author: req.params.author, count: count, books: books });
+    const { page = 1, limit = 10, sort = 'title' } = req.query;
+    const { books, count } = await libraryService.getBooksAndCountByAuthor(req.params.author, page, limit, sort);
+    res.json({ author: req.params.author, count, books });
   } catch (err) {
     res.status(404).json({ message: 'Author not found or has no books' });
   }
@@ -82,50 +84,51 @@ router.get('/count-books-by-author-and-category/:author', async (req, res) => {
   }
 });
 
-
-
-
-
+// Return a book (POST)
 router.post('/return/:id', async (req, res) => {
   try {
     const bookId = req.params.id;
-    const actualReturnDate = new Date(); 
+    const actualReturnDate = new Date();
 
-    
     const book = await libraryService.getBookById(bookId);
     if (!book) {
       return res.status(404).json({ message: 'Book not found' });
     }
 
-    
-    const fineRatePerDay = 10; 
-    const fineAmount = calculateFine(book.submissionDate, actualReturnDate, fineRatePerDay);
+    const fineAmount = libraryService.calculateFine(book.submissionDate, actualReturnDate, book.category, book.borrower);
 
-   
     book.returned = true;
     book.actualReturnDate = actualReturnDate;
     book.fineAmount = fineAmount;
 
-    
     const updatedBook = await book.save();
-    
-    
+
     res.json({ book: updatedBook, fineAmount });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-function calculateFine(submissionDate, actualReturnDate, fineRatePerDay) {
-  const submissionTimestamp = new Date(submissionDate).getTime();
-  const actualReturnTimestamp = new Date(actualReturnDate).getTime();
-  const differenceInMilliseconds = actualReturnTimestamp - submissionTimestamp;
-  const differenceInDays = Math.ceil(differenceInMilliseconds / (1000 * 60 * 60 * 24));
-  
-  if (differenceInDays <= 0) {
-    return 0; 
-  } else {
-    return differenceInDays * fineRatePerDay;
+// Update one book (PATCH)
+router.patch('/update-one', async (req, res) => {
+  try {
+    const { filter, updateData } = req.body;
+    const updatedBook = await libraryService.updateOneBook(filter, updateData);
+    res.json(updatedBook);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
-}
+});
+
+// Update many books (PATCH)
+router.patch('/update-many', async (req, res) => {
+  try {
+    const { filter, updateData } = req.body;
+    const result = await libraryService.updateManyBooks(filter, updateData);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 module.exports = router;
