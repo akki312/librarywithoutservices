@@ -102,7 +102,7 @@ async function fncgetBooksAndCountByAuthor(author, page = 1, limit = 10, sort = 
 
 async function fnccountBooksByAuthorAndCategory(author) {
   try {
-    return await Book.aggregate([
+    const result = await Book.aggregate([
       { $match: { author } },
       {
         $group: {
@@ -118,6 +118,7 @@ async function fnccountBooksByAuthorAndCategory(author) {
         }
       }
     ]);
+    return result;
   } catch (error) {
     throw new Error(`Error counting books by author and category: ${error.message}`);
   }

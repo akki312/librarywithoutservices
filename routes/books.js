@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const libraryService = require('../services/libraryservice').default;
+const libraryService = require('../services/libraryservice');
 
 // Create a book (POST)
 router.post('/create', async (req, res) => {
