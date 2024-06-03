@@ -7,7 +7,7 @@ const errorHandler = require('../middleware/errorHandler');
 // Create a book (POST)
 router.post('/create', async (req, res) => {
   try {
-    const newBook = await libraryService.createBook(req.body);
+    const newBook = await libraryService.fnccreateBook(req.body);
     res.status(201).json(newBook);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -17,7 +17,7 @@ router.post('/create', async (req, res) => {
 // Update a book (POST)
 router.post('/update/:id', async (req, res) => {
   try {
-    const updatedBook = await libraryService.updateBook(req.params.id, req.body);
+    const updatedBook = await libraryService.fncupdateBook(req.params.id, req.body);
     res.json(updatedBook);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -27,7 +27,7 @@ router.post('/update/:id', async (req, res) => {
 // Delete a book (POST)
 router.post('/delete/:id', async (req, res) => {
   try {
-    const result = await libraryService.deleteBook(req.params.id);
+    const result = await libraryService.fncdeleteBook(req.params.id);
     res.json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -37,7 +37,7 @@ router.post('/delete/:id', async (req, res) => {
 // Get one book by ID
 router.get('/:id', async (req, res) => {
   try {
-    const book = await libraryService.getBookById(req.params.id);
+    const book = await libraryService.fncgetBookById(req.params.id);
     res.json(book);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -48,7 +48,7 @@ router.get('/:id', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const { page = 1, limit = 10, sort = 'title' } = req.query;
-    const books = await libraryService.getAllBooks(page, limit, sort);
+    const books = await libraryService.fncgetAllBooks(page, limit, sort);
     res.json(books);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -58,7 +58,7 @@ router.get('/', async (req, res) => {
 // Count books by author
 router.get('/count-books-by-author/:author', async (req, res) => {
   try {
-    const count = await libraryService.countBooksByAuthor(req.params.author);
+    const count = await libraryService.fnccountBooksByAuthor(req.params.author);
     res.json({ author: req.params.author, count });
   } catch (err) {
     res.status(404).json({ message: 'Author not found or has no books' });
@@ -69,7 +69,7 @@ router.get('/count-books-by-author/:author', async (req, res) => {
 router.get('/books-and-count-by-author/:author', async (req, res) => {
   try {
     const { page = 1, limit = 10, sort = 'title' } = req.query;
-    const { books, count } = await libraryService.getBooksAndCountByAuthor(req.params.author, page, limit, sort);
+    const { books, count } = await libraryService.fncgetBooksAndCountByAuthor(req.params.author, page, limit, sort);
     res.json({ author: req.params.author, count, books });
   } catch (err) {
     res.status(404).json({ message: 'Author not found or has no books' });
@@ -79,7 +79,7 @@ router.get('/books-and-count-by-author/:author', async (req, res) => {
 // Count books by author and category
 router.get('/count-books-by-author-and-category/:author', async (req, res) => {
   try {
-    const result = await libraryService.countBooksByAuthorAndCategory(req.params.author);
+    const result = await libraryService.fnccountBooksByAuthorAndCategory(req.params.author);
     res.json({ author: req.params.author, categories: result });
   } catch (err) {
     res.status(404).json({ message: 'Author not found or has no books' });
@@ -92,12 +92,12 @@ router.post('/return/:id', async (req, res) => {
     const bookId = req.params.id;
     const actualReturnDate = new Date();
 
-    const book = await libraryService.getBookById(bookId);
+    const book = await libraryService.fncgetBookById(bookId);
     if (!book) {
       return res.status(404).json({ message: 'Book not found' });
     }
 
-    const fineAmount = libraryService.calculateFine(book.submissionDate, actualReturnDate, book.category, book.borrower);
+    const fineAmount = libraryService.fnccalculateFine(book.submissionDate, actualReturnDate, book.category, book.borrower);
 
     book.returned = true;
     book.actualReturnDate = actualReturnDate;
@@ -115,7 +115,7 @@ router.post('/return/:id', async (req, res) => {
 router.patch('/update-one', async (req, res) => {
   try {
     const { filter, updateData } = req.body;
-    const updatedBook = await libraryService.updateOneBook(filter, updateData);
+    const updatedBook = await libraryService.fncupdateOneBook(filter, updateData);
     res.json(updatedBook);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -126,7 +126,7 @@ router.patch('/update-one', async (req, res) => {
 router.patch('/update-many', async (req, res) => {
   try {
     const { filter, updateData } = req.body;
-    const result = await libraryService.updateManyBooks(filter, updateData);
+    const result = await libraryService.fncupdateManyBooks(filter, updateData);
     res.json(result);
   } catch (err) {
     res.status(400).json({ message: err.message });
