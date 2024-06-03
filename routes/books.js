@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const libraryService = require('../services/libraryservice');
+const errorHandler = require('../middleware/errorHandler');
+
 
 // Create a book (POST)
 router.post('/create', async (req, res) => {
@@ -131,4 +133,6 @@ router.patch('/update-many', async (req, res) => {
   }
 });
 
+
+router.use(errorHandler);
 module.exports = router;
