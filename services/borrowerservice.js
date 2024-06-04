@@ -1,128 +1,100 @@
-// services/borrowerService.js
 const Borrower = require('../models/borrower');
-const Book = require('../models/book');
-const sendBorrowerEmail = require('../utils/sendemail');
+const emailService = require('../utils/sendemail');
 
-async function fnccreateBorrower(borrowerData) {
-  try {
-    const borrower = new Borrower(borrowerData);
-    await borrower.save();
-    // Send an email notification to the borrower with date and time details
-    sendBorrowerEmail(borrower.email, borrower.bookTitle, borrower.dateTaken, borrower.timeTaken);
-    return borrower;
-  } catch (error) {
-    throw new Error(`Error creating borrower: ${error.message}`);
+// Create a new borrower
+async function fnccreateBorrower(data) {
+  if (!data) {
+    throw new Error('Data is required to create a borrower');
   }
+  const borrower = new Borrower(data);
+  await borrower.save();
+
+  // Send a welcome email to the new borrower
+  const emailText = `Dear ${borrower.name},\n\nWelcome to our library. Your borrower ID is ${borrower._id}.\n\nThank you,\nLibrary Team`;
+  await emailService.sendEmail(borrower.email, 'Welcome to the Library', emailText);
+
+  return borrower;
 }
 
+// Get borrower by ID
 async function fncgetBorrowerById(id) {
-  try {
-    return await Borrower.findById(id);
-  } catch (error) {
-    throw new Error(`Error getting borrower by ID: ${error.message}`);
+  if (!id) {
+    throw new Error('Borrower ID is required');
   }
+  const borrower = await Borrower.findById(id);
+  if (!borrower) {
+    throw new Error('Borrower not found');
+  }
+  return borrower;
 }
 
+// Get all borrowers
 async function fncgetAllBorrowers() {
-  try {
-    return await Borrower.find();
-  } catch (error) {
-    throw new Error(`Error getting all borrowers: ${error.message}`);
-  }
+  return await Borrower.find({});
 }
 
-async function fnccalculateFine(borrowerId, bookId) {
-  try {
-    const borrower = await Borrower.findById(borrowerId).populate('borrowedBooks.book');
-    if (!borrower) {
-      throw new Error('Borrower not found');
-    }
-
-    const book = borrower.borrowedBooks.find(b => b.book._id.toString() === bookId);
-    if (!book) {
-      throw new Error('Book not found in borrower records');
-    }
-
-    const returnDate = book.dateReturn;
-    const currentDate = new Date();
-
-    const timeDiff = currentDate - returnDate;
-    const daysLate = Math.ceil(timeDiff / (1000 * 3600 * 24));
-
-    let fine = 0;
-    if (daysLate > 0) {
-      fine = daysLate * 1; // Assuming the fine is $1 per day late
-    }
-
-    book.fine = fine;
-    await borrower.save();
-
-    return fine;
-  } catch (error) {
-    throw new Error(`Error calculating fine: ${error.message}`);
+// Update a borrower
+async function fncupdateBorrower(id, data) {
+  if (!id || !data) {
+    throw new Error('Borrower ID and data are required');
   }
+  const borrower = await Borrower.findByIdAndUpdate(id, data, { new: true });
+  if (!borrower) {
+    throw new Error('Borrower not found');
+  }
+  return borrower;
 }
 
-async function fncupdateBorrower(id, updatedData) {
-  try {
-    const borrower = await Borrower.findByIdAndUpdate(id, updatedData, { new: true });
-    if (!borrower) {
-      throw new Error('Borrower not found');
-    }
-    return borrower;
-  } catch (err) {
-    throw new Error(`Error updating borrower: ${err.message}`);
-  }
-}
-
-async function fnccheckInBook(borrowerId, bookId) {
-  try {
-    const borrower = await Borrower.findById(borrowerId);
-    if (!borrower) {
-      throw new Error('Borrower not found');
-    }
-
-    const bookIndex = borrower.borrowedBooks.indexOf(bookId);
-    if (bookIndex > -1) {
-      borrower.borrowedBooks.splice(bookIndex, 1); // Remove the book from the array
-    } else {
-      throw new Error('Book not found in borrowed books');
-    }
-
-    await borrower.save();
-    return borrower;
-  } catch (error) {
-    throw new Error(`Error checking in book: ${error.message}`);
-  }
-}
-
+// Assign a book to a borrower
 async function fncassignBookToBorrower(borrowerId, bookId) {
-  try {
-    const borrower = await Borrower.findById(borrowerId);
-    const book = await Book.findById(bookId);
-
-    if (!borrower) {
-      throw new Error('Borrower not found');
-    }
-
-    if (!book) {
-      throw new Error('Book not found');
-    }
-
-    borrower.borrowedBooks.push(bookId);
-    await borrower.save();
-    return borrower;
-  } catch (error) {
-    throw new Error(`Error assigning book to borrower: ${error.message}`);
+  if (!borrowerId || !bookId) {
+    throw new Error('Borrower ID and Book ID are required');
   }
+  const borrower = await Borrower.findById(borrowerId);
+  if (!borrower) {
+    throw new Error('Borrower not found');
+  }
+  // Assume you have a method to assign the book to the borrower
+  borrower.assignedBooks.push(bookId); // Example implementation
+  await borrower.save();
+  return borrower;
+}
+
+// Check in a book
+async function fnccheckInBook(borrowerId, bookId) {
+  if (!borrowerId || !bookId) {
+    throw new Error('Borrower ID and Book ID are required');
+  }
+  const borrower = await Borrower.findById(borrowerId);
+  if (!borrower) {
+    throw new Error('Borrower not found');
+  }
+  // Assume you have a method to check in the book
+  borrower.assignedBooks = borrower.assignedBooks.filter(id => id !== bookId); // Example implementation
+  await borrower.save();
+  return borrower;
+}
+
+// Calculate fine for a borrower
+async function fnccalculateFine(borrowerId, bookId) {
+  if (!borrowerId || !bookId) {
+    throw new Error('Borrower ID and Book ID are required');
+  }
+  const borrower = await Borrower.findById(borrowerId);
+  if (!borrower) {
+    throw new Error('Borrower not found');
+  }
+  // Assume you have a method to calculate the fine
+  const fine = borrower.calculateFine(bookId); // Example implementation
+  return fine;
 }
 
 module.exports = {
   fnccreateBorrower,
   fncgetBorrowerById,
   fncgetAllBorrowers,
-  fnccalculateFine,
   fncupdateBorrower,
+  fncassignBookToBorrower,
   fnccheckInBook,
-  fncassignBookToBorrower
+  fnccalculateFine,
 };

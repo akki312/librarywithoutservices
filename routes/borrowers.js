@@ -13,7 +13,7 @@ router.post('/newborrower', async (req, res) => {
 });
 
 // Get borrower by ID
-router.get('/borrowerid', async (req, res) => {
+router.get('/borrowerid/:id', async (req, res) => { // Note: Added ':id' to the route
   try {
     const borrower = await borrowerService.fncgetBorrowerById(req.params.id);
     if (!borrower) {
@@ -36,7 +36,7 @@ router.get('/listofborrowers', async (req, res) => {
 });
 
 // Update a borrower
-router.put('/updation of borrower', async (req, res) => {
+router.put('/updateborrower/:id', async (req, res) => { // Note: Changed route to '/updateborrower/:id'
   try {
     const borrower = await borrowerService.fncupdateBorrower(req.params.id, req.body);
     if (!borrower) {
@@ -51,7 +51,11 @@ router.put('/updation of borrower', async (req, res) => {
 // Assign a book to a borrower
 router.post('/:borrowerId/assign/:bookId', async (req, res) => {
   try {
-    const borrower = await borrowerService.fncassignBookToBorrower(req.params.borrowerId, req.params.bookId);
+    const { borrowerId, bookId } = req.params;
+    if (!borrowerId || !bookId) {
+      return res.status(400).json({ message: 'Borrower ID and Book ID are required' });
+    }
+    const borrower = await borrowerService.fncassignBookToBorrower(borrowerId, bookId);
     res.json(borrower);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -61,7 +65,11 @@ router.post('/:borrowerId/assign/:bookId', async (req, res) => {
 // Check in a book
 router.post('/:borrowerId/checkin/:bookId', async (req, res) => {
   try {
-    const borrower = await borrowerService.fnccheckInBook(req.params.borrowerId, req.params.bookId);
+    const { borrowerId, bookId } = req.params;
+    if (!borrowerId || !bookId) {
+      return res.status(400).json({ message: 'Borrower ID and Book ID are required' });
+    }
+    const borrower = await borrowerService.fnccheckInBook(borrowerId, bookId);
     res.json(borrower);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -69,9 +77,13 @@ router.post('/:borrowerId/checkin/:bookId', async (req, res) => {
 });
 
 // Calculate fine for a borrower
-router.get('/:borrowerId/fine/:bookId', async (req, res) => {
+router.post('/:borrowerId/fine/:bookId', async (req, res) => {
   try {
-    const fine = await borrowerService.fnccalculateFine(req.params.borrowerId, req.params.bookId);
+    const { borrowerId, bookId } = req.params;
+    if (!borrowerId || !bookId) {
+      return res.status(400).json({ message: 'Borrower ID and Book ID are required' });
+    }
+    const fine = await borrowerService.fnccalculateFine(borrowerId, bookId);
     res.json({ fine });
   } catch (error) {
     res.status(500).json({ message: error.message });
