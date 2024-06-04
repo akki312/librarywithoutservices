@@ -87,17 +87,21 @@ router.get('/count-books-by-author-and-category/:author', async (req, res) => {
 });
 
 // Return a book (POST)
-router.post('/return/:id', async (req, res) => {
+router.post('/return/:id', async (req, res, next) => {
   try {
     const bookId = req.params.id;
     const actualReturnDate = new Date();
 
     const book = await libraryService.fncgetBookById(bookId);
     if (!book) {
-      return res.status(404).json({ message: 'Book not found' });
+      throw new Error('Book not found');
     }
 
-    const fineAmount = libraryService.fnccalculateFine(book.submissionDate, actualReturnDate, book.category, book.borrower);
+    if (!book.borrower || typeof book.borrower !== 'object') {
+      throw new Error('Borrower information is missing or invalid');
+    }
+
+    const fineAmount = fnccalculateFine(book.submissionDate, actualReturnDate, book.category, book.borrower);
 
     book.returned = true;
     book.actualReturnDate = actualReturnDate;
@@ -107,9 +111,11 @@ router.post('/return/:id', async (req, res) => {
 
     res.json({ book: updatedBook, fineAmount });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error(`Error returning book: ${err.message}`);
+    next(err);
   }
 });
+
 
 // Update one book (PATCH)
 router.patch('/update-one', async (req, res) => {
