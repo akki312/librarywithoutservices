@@ -5,7 +5,7 @@ const errorHandler = require('../middleware/errorHandler');
 
 
 // Create a book (POST)
-router.post('/create', async (req, res) => {
+router.post('/createbooks', async (req, res) => {
   try {
     const newBook = await libraryService.fnccreateBook(req.body);
     res.status(201).json(newBook);
@@ -15,7 +15,7 @@ router.post('/create', async (req, res) => {
 });
 
 // Update a book (POST)
-router.post('/update/:id', async (req, res) => {
+router.post('/updatebooks', async (req, res) => {
   try {
     const updatedBook = await libraryService.fncupdateBook(req.params.id, req.body);
     res.json(updatedBook);
@@ -25,7 +25,7 @@ router.post('/update/:id', async (req, res) => {
 });
 
 // Delete a book (POST)
-router.post('/delete/:id', async (req, res) => {
+router.post('/deletebooks', async (req, res) => {
   try {
     const result = await libraryService.fncdeleteBook(req.params.id);
     res.json(result);
@@ -35,7 +35,7 @@ router.post('/delete/:id', async (req, res) => {
 });
 
 // Get one book by ID
-router.get('/:id', async (req, res) => {
+router.get('/getbookbyid', async (req, res) => {
   try {
     const book = await libraryService.fncgetBookById(req.params.id);
     res.json(book);
@@ -45,7 +45,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Get all books
-router.get('/', async (req, res) => {
+router.get('/getallbooks', async (req, res) => {
   try {
     const { page = 1, limit = 10, sort = 'title' } = req.query;
     const books = await libraryService.fncgetAllBooks(page, limit, sort);
@@ -87,7 +87,7 @@ router.get('/count-books-by-author-and-category/:author', async (req, res) => {
 });
 
 // Return a book (POST)
-router.post('/return/:id', async (req, res, next) => {
+router.post('/returningofbooks', async (req, res, next) => {
   try {
     const bookId = req.params.id;
     const actualReturnDate = new Date();

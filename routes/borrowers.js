@@ -3,7 +3,7 @@ const router = express.Router();
 const borrowerService = require('../services/borrowerservice');
 
 // Create a new borrower
-router.post('/', async (req, res) => {
+router.post('/newborrower', async (req, res) => {
   try {
     const borrower = await borrowerService.fnccreateBorrower(req.body);
     res.status(201).json(borrower);
@@ -13,7 +13,7 @@ router.post('/', async (req, res) => {
 });
 
 // Get borrower by ID
-router.get('/:id', async (req, res) => {
+router.get('/borrowerid', async (req, res) => {
   try {
     const borrower = await borrowerService.fncgetBorrowerById(req.params.id);
     if (!borrower) {
@@ -26,7 +26,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Get all borrowers
-router.get('/', async (req, res) => {
+router.get('/listofborrowers', async (req, res) => {
   try {
     const borrowers = await borrowerService.fncgetAllBorrowers();
     res.json(borrowers);
@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
 });
 
 // Update a borrower
-router.put('/:id', async (req, res) => {
+router.put('/updation of borrower', async (req, res) => {
   try {
     const borrower = await borrowerService.fncupdateBorrower(req.params.id, req.body);
     if (!borrower) {
