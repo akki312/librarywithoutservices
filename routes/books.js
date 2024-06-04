@@ -3,7 +3,6 @@ const router = express.Router();
 const libraryService = require('../services/libraryservice');
 const errorHandler = require('../middleware/errorHandler');
 
-
 // Create a book (POST)
 router.post('/createbooks', async (req, res) => {
   try {
@@ -14,8 +13,8 @@ router.post('/createbooks', async (req, res) => {
   }
 });
 
-// Update a book (POST)
-router.post('/updatebooks', async (req, res) => {
+// Update a book (PATCH)
+router.patch('/updatebooks/:id', async (req, res) => {
   try {
     const updatedBook = await libraryService.fncupdateBook(req.params.id, req.body);
     res.json(updatedBook);
@@ -24,8 +23,8 @@ router.post('/updatebooks', async (req, res) => {
   }
 });
 
-// Delete a book (POST)
-router.post('/deletebooks', async (req, res) => {
+// Delete a book (DELETE)
+router.delete('/deletebooks/:id', async (req, res) => {
   try {
     const result = await libraryService.fncdeleteBook(req.params.id);
     res.json(result);
@@ -35,7 +34,7 @@ router.post('/deletebooks', async (req, res) => {
 });
 
 // Get one book by ID
-router.get('/getbookbyid', async (req, res) => {
+router.get('/getbookbyid/:id', async (req, res) => {
   try {
     const book = await libraryService.fncgetBookById(req.params.id);
     res.json(book);
@@ -87,7 +86,7 @@ router.get('/count-books-by-author-and-category/:author', async (req, res) => {
 });
 
 // Return a book (POST)
-router.post('/returningofbooks', async (req, res, next) => {
+router.post('/returningofbooks/:id', async (req, res, next) => {
   try {
     const bookId = req.params.id;
     const actualReturnDate = new Date();
@@ -101,13 +100,13 @@ router.post('/returningofbooks', async (req, res, next) => {
       throw new Error('Borrower information is missing or invalid');
     }
 
-    const fineAmount = fnccalculateFine(book.submissionDate, actualReturnDate, book.category, book.borrower);
+    const fineAmount = libraryService.fnccalculateFine(book.submissionDate, actualReturnDate, book.category, book.borrower);
 
     book.returned = true;
     book.actualReturnDate = actualReturnDate;
     book.fineAmount = fineAmount;
 
-    const updatedBook = await book.save();
+    const updatedBook = await libraryService.fncupdateBook(bookId, book);
 
     res.json({ book: updatedBook, fineAmount });
   } catch (err) {
@@ -116,6 +115,17 @@ router.post('/returningofbooks', async (req, res, next) => {
   }
 });
 
+// Calculate fine by borrowing ID (POST)
+router.post('/calculatefine/:borrowingId', async (req, res, next) => {
+  try {
+    const borrowingId = req.params.borrowingId;
+    const fineAmount = await libraryService.fnccalculateFineByBorrowingId(borrowingId);
+    res.json({ borrowingId, fineAmount });
+  } catch (err) {
+    console.error(`Error calculating fine: ${err.message}`);
+    next(err);
+  }
+});
 
 // Update one book (PATCH)
 router.patch('/update-one', async (req, res) => {
@@ -138,7 +148,6 @@ router.patch('/update-many', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-
 
 router.use(errorHandler);
 module.exports = router;

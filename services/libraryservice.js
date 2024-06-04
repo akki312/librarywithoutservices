@@ -118,7 +118,7 @@ async function fnccountBooksByAuthorAndCategory(author) {
         }
       }
     ]);
-    return result;
+    return result; 
   } catch (error) {
     throw new Error(`Error counting books by author and category: ${error.message}`);
   }
@@ -156,6 +156,20 @@ function fnccalculateFine(dateTaken, dateReturn, category, borrower) {
   return fine;
 }
 
+const fnccalculateFineByBorrowingId = async (borrowingId) => {
+  const borrowingRecord = await findBorrowingRecordById(borrowingId); // Implement this function to find the borrowing record by ID
+  if (!borrowingRecord) {
+    throw new Error('Borrowing record not found');
+  }
+
+  const { submissionDate, category, borrower } = borrowingRecord;
+  const actualReturnDate = new Date(); // Assuming fine is calculated at the current date
+
+  return fnccalculateFine(submissionDate, actualReturnDate, category, borrower);
+};
+
+
+
 function validateBookData(bookData) {
   if (!bookData.title || !bookData.author) {
     throw new Error('Book title and author are required');
@@ -183,6 +197,7 @@ module.exports = {
   fncgetBooksAndCountByAuthor,
   fnccountBooksByAuthorAndCategory,
   fnccalculateFine,
+  fnccalculateFineByBorrowingId,
   fncupdateOneBook,
   fncupdateManyBooks
 };
