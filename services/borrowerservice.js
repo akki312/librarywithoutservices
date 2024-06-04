@@ -54,8 +54,7 @@ async function fncassignBookToBorrower(borrowerId, bookId) {
   if (!borrower) {
     throw new Error('Borrower not found');
   }
-  // Assume you have a method to assign the book to the borrower
-  borrower.assignedBooks.push(bookId); // Example implementation
+  borrower.assignedBooks.push({ bookId, assignedDate: new Date() });
   await borrower.save();
   return borrower;
 }
@@ -69,8 +68,7 @@ async function fnccheckInBook(borrowerId, bookId) {
   if (!borrower) {
     throw new Error('Borrower not found');
   }
-  // Assume you have a method to check in the book
-  borrower.assignedBooks = borrower.assignedBooks.filter(id => id !== bookId); // Example implementation
+  borrower.assignedBooks = borrower.assignedBooks.filter(book => !book.bookId.equals(bookId));
   await borrower.save();
   return borrower;
 }
@@ -84,8 +82,8 @@ async function fnccalculateFine(borrowerId, bookId) {
   if (!borrower) {
     throw new Error('Borrower not found');
   }
-  // Assume you have a method to calculate the fine
-  const fine = borrower.calculateFine(bookId); // Example implementation
+  console.log('Assigned Books:', borrower.assignedBooks); // Log assigned books for debugging
+  const fine = borrower.calculateFine(bookId);
   return fine;
 }
 

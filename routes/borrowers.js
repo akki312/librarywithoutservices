@@ -5,6 +5,10 @@ const borrowerService = require('../services/borrowerservice');
 // Create a new borrower
 router.post('/newborrower', async (req, res) => {
   try {
+    if (!req.body) {
+      return res.status(400).json({ message: 'Request body is required' });
+    }
+
     const borrower = await borrowerService.fnccreateBorrower(req.body);
     res.status(201).json(borrower);
   } catch (error) {
@@ -13,7 +17,7 @@ router.post('/newborrower', async (req, res) => {
 });
 
 // Get borrower by ID
-router.get('/borrowerid/:id', async (req, res) => { // Note: Added ':id' to the route
+router.get('/borrowerid/:id', async (req, res) => {
   try {
     const borrower = await borrowerService.fncgetBorrowerById(req.params.id);
     if (!borrower) {
@@ -36,8 +40,11 @@ router.get('/listofborrowers', async (req, res) => {
 });
 
 // Update a borrower
-router.put('/updateborrower/:id', async (req, res) => { // Note: Changed route to '/updateborrower/:id'
+router.put('/updateborrower/:id', async (req, res) => {
   try {
+    if (!req.params.id || !req.body) {
+      return res.status(400).json({ message: 'Borrower ID and data are required' });
+    }
     const borrower = await borrowerService.fncupdateBorrower(req.params.id, req.body);
     if (!borrower) {
       return res.status(404).json({ message: 'Borrower not found' });
@@ -85,6 +92,17 @@ router.post('/:borrowerId/fine/:bookId', async (req, res) => {
     }
     const fine = await borrowerService.fnccalculateFine(borrowerId, bookId);
     res.json({ fine });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Verify book assignments
+router.get('/:borrowerId/verifyAssignments', async (req, res) => {
+  try {
+    const { borrowerId } = req.params;
+    const borrower = await borrowerService.fncgetBorrowerById(borrowerId);
+    res.json({ assignedBooks: borrower.assignedBooks });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
