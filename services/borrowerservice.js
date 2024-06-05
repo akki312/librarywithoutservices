@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Borrower = require('../models/borrower');
 const emailService = require('../utils/sendemail');
+const MAX_BORROWING_DAYS = 14;
 
 function isValidObjectId(id) {
   return mongoose.Types.ObjectId.isValid(id);
@@ -57,16 +58,18 @@ async function fncassignBookToBorrower(borrowerId, bookId) {
     throw new Error('Borrower not found');
   }
 
-  // Check if the book is already assigned
   const alreadyAssigned = borrower.assignedBooks.some(book => book.bookId.equals(bookId));
   if (alreadyAssigned) {
     return { message: 'Book is already assigned to this borrower' };
   }
 
-  // Assign the book if not already assigned
-  borrower.assignedBooks.push({ bookId, assignedDate: new Date() });
+  const assignedDate = new Date();
+  const dueDate = new Date();
+  dueDate.setDate(assignedDate.getDate() + MAX_BORROWING_DAYS);
+
+  borrower.assignedBooks.push({ bookId, assignedDate, dueDate });
   await borrower.save();
-  
+
   return borrower;
 }
 // Check in a book

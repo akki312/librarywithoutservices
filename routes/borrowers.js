@@ -1,14 +1,37 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const borrowerService = require('../services/borrowerservice');
+
+// Helper function to validate ObjectId
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
+
+// Middleware to validate ObjectId
+function validateObjectId(req, res, next) {
+  const { id, borrowerId, bookId } = req.params;
+
+  if (id && !isValidObjectId(id)) {
+    return res.status(400).json({ message: 'Invalid ID format' });
+  }
+  if (borrowerId && !isValidObjectId(borrowerId)) {
+    return res.status(400).json({ message: 'Invalid borrower ID format' });
+  }
+  if (bookId && !isValidObjectId(bookId)) {
+    return res.status(400).json({ message: 'Invalid book ID format' });
+  }
+
+  next();
+}
+
+// Apply the middleware to routes that use borrowerId and bookId
+router.use('/:borrowerId/*', validateObjectId);
+router.use('/:borrowerId/:bookId/*', validateObjectId);
 
 // Create a new borrower
 router.post('/newborrower', async (req, res) => {
   try {
-    if (!req.body) {
-      return res.status(400).json({ message: 'Request body is required' });
-    }
-
     const borrower = await borrowerService.fnccreateBorrower(req.body);
     res.status(201).json(borrower);
   } catch (error) {
@@ -17,7 +40,7 @@ router.post('/newborrower', async (req, res) => {
 });
 
 // Get borrower by ID
-router.get('/borrowerid/:id', async (req, res) => {
+router.get('/borrowerid/:id', validateObjectId, async (req, res) => {
   try {
     const borrower = await borrowerService.fncgetBorrowerById(req.params.id);
     if (!borrower) {
@@ -40,11 +63,8 @@ router.get('/listofborrowers', async (req, res) => {
 });
 
 // Update a borrower
-router.put('/updateborrower/:id', async (req, res) => {
+router.put('/updateborrower/:id', validateObjectId, async (req, res) => {
   try {
-    if (!req.params.id || !req.body) {
-      return res.status(400).json({ message: 'Borrower ID and data are required' });
-    }
     const borrower = await borrowerService.fncupdateBorrower(req.params.id, req.body);
     if (!borrower) {
       return res.status(404).json({ message: 'Borrower not found' });
@@ -58,11 +78,7 @@ router.put('/updateborrower/:id', async (req, res) => {
 // Assign a book to a borrower
 router.post('/:borrowerId/assign/:bookId', async (req, res) => {
   try {
-    const { borrowerId, bookId } = req.params;
-    if (!borrowerId || !bookId) {
-      return res.status(400).json({ message: 'Borrower ID and Book ID are required' });
-    }
-    const borrower = await borrowerService.fncassignBookToBorrower(borrowerId, bookId);
+    const borrower = await borrowerService.fncassignBookToBorrower(req.params.borrowerId, req.params.bookId);
     res.json(borrower);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -72,11 +88,7 @@ router.post('/:borrowerId/assign/:bookId', async (req, res) => {
 // Check in a book
 router.post('/:borrowerId/checkin/:bookId', async (req, res) => {
   try {
-    const { borrowerId, bookId } = req.params;
-    if (!borrowerId || !bookId) {
-      return res.status(400).json({ message: 'Borrower ID and Book ID are required' });
-    }
-    const borrower = await borrowerService.fnccheckInBook(borrowerId, bookId);
+    const borrower = await borrowerService.fnccheckInBook(req.params.borrowerId, req.params.bookId);
     res.json(borrower);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -86,11 +98,7 @@ router.post('/:borrowerId/checkin/:bookId', async (req, res) => {
 // Calculate fine for a borrower
 router.post('/:borrowerId/fine/:bookId', async (req, res) => {
   try {
-    const { borrowerId, bookId } = req.params;
-    if (!borrowerId || !bookId) {
-      return res.status(400).json({ message: 'Borrower ID and Book ID are required' });
-    }
-    const fine = await borrowerService.fnccalculateFine(borrowerId, bookId);
+    const fine = await borrowerService.fnccalculateFine(req.params.borrowerId, req.params.bookId);
     res.json({ fine });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -100,8 +108,7 @@ router.post('/:borrowerId/fine/:bookId', async (req, res) => {
 // Verify book assignments
 router.get('/:borrowerId/verifyAssignments', async (req, res) => {
   try {
-    const { borrowerId } = req.params;
-    const borrower = await borrowerService.fncgetBorrowerById(borrowerId);
+    const borrower = await borrowerService.fncgetBorrowerById(req.params.borrowerId);
     res.json({ assignedBooks: borrower.assignedBooks });
   } catch (error) {
     res.status(500).json({ message: error.message });
