@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const Borrower = require('../models/borrower');
+const Book = require('../models/book'); // Assuming you have a Book model
 const emailService = require('../utils/sendemail');
-const MAX_BORROWING_DAYS = 14;
+const MAX_BORROWING_DAYS = 5;
 
 // Create a new borrower
 async function fnccreateBorrower(data) {
@@ -16,7 +17,7 @@ async function fnccreateBorrower(data) {
 
 // Get borrower by ID
 async function fncgetBorrowerById(id) {
-  const borrower = await Borrower.findById(id).populate('borrowedBooks').exec();
+  const borrower = await Borrower.findById(id).populate('assignedBooks.bookId').exec();
   if (!borrower) {
     throw new Error('Borrower not found');
   }
@@ -25,7 +26,7 @@ async function fncgetBorrowerById(id) {
 
 // Get all borrowers
 async function fncgetAllBorrowers() {
-  return await Borrower.find({});
+  return await Borrower.find({}).populate('assignedBooks.bookId').exec();
 }
 
 // Update a borrower
@@ -39,7 +40,7 @@ async function fncupdateBorrower(id, data) {
 
 // Assign a book to a borrower
 async function fncassignBookToBorrower(borrowerId, bookId) {
-  const borrower = await Borrower.findById(borrowerId);
+  const borrower = await Borrower.findById(borrowerId).populate('assignedBooks.bookId').exec();
   if (!borrower) {
     throw new Error('Borrower not found');
   }
@@ -56,12 +57,30 @@ async function fncassignBookToBorrower(borrowerId, bookId) {
   borrower.assignedBooks.push({ bookId, assignedDate, dueDate });
   await borrower.save();
 
-  return borrower;
+  // Populate book details
+  await borrower.populate('assignedBooks.bookId').execPopulate();
+
+  // Replace bookId with book names in the response
+  const assignedBooksWithNames = borrower.assignedBooks.map(book => ({
+    bookName: book.bookId.name, // Assuming the Book model has a 'name' field
+    assignedDate: book.assignedDate,
+    dueDate: book.dueDate
+  }));
+
+  // Return the borrower with assigned book names
+  return {
+    _id: borrower._id,
+    name: borrower.name,
+    contact: borrower.contact,
+    email: borrower.email,
+    fine: borrower.fine,
+    assignedBooks: assignedBooksWithNames
+  };
 }
 
 // Check in a book
 async function fnccheckInBook(borrowerId, bookId) {
-  const borrower = await Borrower.findById(borrowerId);
+  const borrower = await Borrower.findById(borrowerId).populate('assignedBooks.bookId').exec();
   if (!borrower) {
     throw new Error('Borrower not found');
   }
@@ -72,7 +91,7 @@ async function fnccheckInBook(borrowerId, bookId) {
 
 // Calculate fine for a borrower
 async function fnccalculateFine(borrowerId, bookId) {
-  const borrower = await Borrower.findById(borrowerId);
+  const borrower = await Borrower.findById(borrowerId).populate('assignedBooks.bookId').exec();
   if (!borrower) {
     throw new Error('Borrower not found');
   }
