@@ -3,10 +3,6 @@ const Borrower = require('../models/borrower');
 const emailService = require('../utils/sendemail');
 const MAX_BORROWING_DAYS = 14;
 
-function isValidObjectId(id) {
-  return mongoose.Types.ObjectId.isValid(id);
-}
-
 // Create a new borrower
 async function fnccreateBorrower(data) {
   const borrower = new Borrower(data);
@@ -20,10 +16,7 @@ async function fnccreateBorrower(data) {
 
 // Get borrower by ID
 async function fncgetBorrowerById(id) {
-  if (!isValidObjectId(id)) {
-    throw new Error('Invalid borrower ID');
-  }
-  const borrower = await Borrower.findById(id);
+  const borrower = await Borrower.findById(id).populate('borrowedBooks').exec();
   if (!borrower) {
     throw new Error('Borrower not found');
   }
@@ -37,9 +30,6 @@ async function fncgetAllBorrowers() {
 
 // Update a borrower
 async function fncupdateBorrower(id, data) {
-  if (!isValidObjectId(id)) {
-    throw new Error('Invalid borrower ID');
-  }
   const borrower = await Borrower.findByIdAndUpdate(id, data, { new: true });
   if (!borrower) {
     throw new Error('Borrower not found');
@@ -49,10 +39,6 @@ async function fncupdateBorrower(id, data) {
 
 // Assign a book to a borrower
 async function fncassignBookToBorrower(borrowerId, bookId) {
-  if (!isValidObjectId(borrowerId) || !isValidObjectId(bookId)) {
-    throw new Error('Invalid borrower ID or book ID');
-  }
-
   const borrower = await Borrower.findById(borrowerId);
   if (!borrower) {
     throw new Error('Borrower not found');
@@ -72,11 +58,9 @@ async function fncassignBookToBorrower(borrowerId, bookId) {
 
   return borrower;
 }
+
 // Check in a book
 async function fnccheckInBook(borrowerId, bookId) {
-  if (!isValidObjectId(borrowerId) || !isValidObjectId(bookId)) {
-    throw new Error('Invalid borrower ID or book ID');
-  }
   const borrower = await Borrower.findById(borrowerId);
   if (!borrower) {
     throw new Error('Borrower not found');
@@ -88,9 +72,6 @@ async function fnccheckInBook(borrowerId, bookId) {
 
 // Calculate fine for a borrower
 async function fnccalculateFine(borrowerId, bookId) {
-  if (!isValidObjectId(borrowerId) || !isValidObjectId(bookId)) {
-    throw new Error('Invalid borrower ID or book ID');
-  }
   const borrower = await Borrower.findById(borrowerId);
   if (!borrower) {
     throw new Error('Borrower not found');
