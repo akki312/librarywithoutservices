@@ -78,12 +78,21 @@ router.put('/updateborrower/:id', validateObjectId, async (req, res) => {
 // Assign a book to a borrower
 router.post('/:borrowerId/assign/:bookId', async (req, res) => {
   try {
-    const borrower = await borrowerService.fncassignBookToBorrower(req.params.borrowerId, req.params.bookId);
+    const borrowerId = req.params.borrowerId;
+    const bookId = req.params.bookId;
+
+    // Assign the book to the borrower
+    const borrower = await borrowerService.fncassignBookToBorrower(borrowerId, bookId);
+
+    // Populate the book field in the borrower document
+    await borrower.populate('borrowedBooks').execPopulate();
+
     res.json(borrower);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 // Check in a book
 router.post('/:borrowerId/checkin/:bookId', async (req, res) => {
