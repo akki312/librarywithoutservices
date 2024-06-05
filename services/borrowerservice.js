@@ -1,15 +1,16 @@
+const mongoose = require('mongoose');
 const Borrower = require('../models/borrower');
 const emailService = require('../utils/sendemail');
 
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
+
 // Create a new borrower
 async function fnccreateBorrower(data) {
-  if (!data) {
-    throw new Error('Data is required to create a borrower');
-  }
   const borrower = new Borrower(data);
   await borrower.save();
 
-  // Send a welcome email to the new borrower
   const emailText = `Dear ${borrower.name},\n\nWelcome to our library. Your borrower ID is ${borrower._id}.\n\nThank you,\nLibrary Team`;
   await emailService.sendEmail(borrower.email, 'Welcome to the Library', emailText);
 
@@ -18,8 +19,8 @@ async function fnccreateBorrower(data) {
 
 // Get borrower by ID
 async function fncgetBorrowerById(id) {
-  if (!id) {
-    throw new Error('Borrower ID is required');
+  if (!isValidObjectId(id)) {
+    throw new Error('Invalid borrower ID');
   }
   const borrower = await Borrower.findById(id);
   if (!borrower) {
@@ -35,8 +36,8 @@ async function fncgetAllBorrowers() {
 
 // Update a borrower
 async function fncupdateBorrower(id, data) {
-  if (!id || !data) {
-    throw new Error('Borrower ID and data are required');
+  if (!isValidObjectId(id)) {
+    throw new Error('Invalid borrower ID');
   }
   const borrower = await Borrower.findByIdAndUpdate(id, data, { new: true });
   if (!borrower) {
@@ -47,22 +48,31 @@ async function fncupdateBorrower(id, data) {
 
 // Assign a book to a borrower
 async function fncassignBookToBorrower(borrowerId, bookId) {
-  if (!borrowerId || !bookId) {
-    throw new Error('Borrower ID and Book ID are required');
+  if (!isValidObjectId(borrowerId) || !isValidObjectId(bookId)) {
+    throw new Error('Invalid borrower ID or book ID');
   }
+
   const borrower = await Borrower.findById(borrowerId);
   if (!borrower) {
     throw new Error('Borrower not found');
   }
+
+  // Check if the book is already assigned
+  const alreadyAssigned = borrower.assignedBooks.some(book => book.bookId.equals(bookId));
+  if (alreadyAssigned) {
+    return { message: 'Book is already assigned to this borrower' };
+  }
+
+  // Assign the book if not already assigned
   borrower.assignedBooks.push({ bookId, assignedDate: new Date() });
   await borrower.save();
+  
   return borrower;
 }
-
 // Check in a book
 async function fnccheckInBook(borrowerId, bookId) {
-  if (!borrowerId || !bookId) {
-    throw new Error('Borrower ID and Book ID are required');
+  if (!isValidObjectId(borrowerId) || !isValidObjectId(bookId)) {
+    throw new Error('Invalid borrower ID or book ID');
   }
   const borrower = await Borrower.findById(borrowerId);
   if (!borrower) {
@@ -75,14 +85,17 @@ async function fnccheckInBook(borrowerId, bookId) {
 
 // Calculate fine for a borrower
 async function fnccalculateFine(borrowerId, bookId) {
-  if (!borrowerId || !bookId) {
-    throw new Error('Borrower ID and Book ID are required');
+  if (!isValidObjectId(borrowerId) || !isValidObjectId(bookId)) {
+    throw new Error('Invalid borrower ID or book ID');
   }
   const borrower = await Borrower.findById(borrowerId);
   if (!borrower) {
     throw new Error('Borrower not found');
   }
-  console.log('Assigned Books:', borrower.assignedBooks); // Log assigned books for debugging
+  const assignedBook = borrower.assignedBooks.find(book => book.bookId.equals(bookId));
+  if (!assignedBook) {
+    throw new Error('Book not assigned to this borrower');
+  }
   const fine = borrower.calculateFine(bookId);
   return fine;
 }
