@@ -88,12 +88,39 @@ router.post('/:borrowerId/assign/:bookId', async (req, res) => {
 // Check in a book
 router.post('/:borrowerId/checkin/:bookId', async (req, res) => {
   try {
-    const borrower = await borrowerService.fnccheckInBook(req.params.borrowerId, req.params.bookId);
-    res.json(borrower);
+    const borrowerId = req.params.borrowerId;
+    const bookId = req.params.bookId;
+
+    // Retrieve borrower's information
+    const borrower = await borrowerService.fncgetBorrowerById(borrowerId);
+    if (!borrower) {
+      throw new Error('Borrower not found');
+    }
+
+    // Retrieve book's information
+    const book = await libraryService.fncgetBookById(bookId);
+    if (!book) {
+      throw new Error('Book not found');
+    }
+
+    // Calculate fine amount
+    const fineAmount = calculateFine(book.submissionDate, new Date(), book.category, borrower);
+    
+    // Update book's status
+    book.returned = true;
+    book.actualReturnDate = new Date();
+    await libraryService.fncupdateBook(bookId, book);
+
+    // Optionally, update borrower's fine amount
+    borrower.fine += fineAmount;
+    await borrowerService.fncupdateBorrower(borrowerId, borrower);
+
+    res.json({ borrower, fineAmount });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 // Calculate fine for a borrower
 router.post('/:borrowerId/fine/:bookId', async (req, res) => {
