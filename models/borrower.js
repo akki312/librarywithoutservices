@@ -1,48 +1,37 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const borrowerSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  assignedBooks: [{
-    bookId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Book', // Assuming you have a Book model
-      required: true
-    },
-    assignedDate: {
-      type: Date,
-      required: true
-    }
-  }],
-  // Add other necessary fields and methods
+const AssignedBookSchema = new Schema({
+  bookId: { type: Schema.Types.ObjectId, ref: 'Book' },
+  assignedDate: { type: Date, default: Date.now },
+  dueDate: { type: Date, required: true }, // Due date field
+  returnDate: { type: Date }, // Return date field
 });
 
-// Method to calculate fine
-borrowerSchema.methods.calculateFine = function (bookId) {
+const BorrowerSchema = new Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  assignedBooks: [AssignedBookSchema],
+});
+
+BorrowerSchema.methods.calculateFine = function(bookId) {
   const assignedBook = this.assignedBooks.find(book => book.bookId.equals(bookId));
   if (!assignedBook) {
     throw new Error('Book not assigned to this borrower');
   }
 
-  const assignedDate = assignedBook.assignedDate;
-  const currentDate = new Date();
-  const diffTime = Math.abs(currentDate - assignedDate);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+  if (!assignedBook.returnDate) {
+    assignedBook.returnDate = new Date(); // Use current date if return date is not set
+  }
 
-  const finePerDay = 1; // Example fine rate
-  const gracePeriod = 14; // Example grace period of 14 days
+  const dueDate = assignedBook.dueDate;
+  const returnDate = assignedBook.returnDate;
+  const overdueDays = Math.max(0, Math.ceil((returnDate - dueDate) / (1000 * 60 * 60 * 24)));
+  const fineRate = 0.50; // Example fine rate per day
 
-  return diffDays > gracePeriod ? (diffDays - gracePeriod) * finePerDay : 0;
+  return overdueDays * fineRate;
 };
 
-const Borrower = mongoose.model('Borrower', borrowerSchema);
+const Borrower = mongoose.model('Borrower', BorrowerSchema);
 
 module.exports = Borrower;
