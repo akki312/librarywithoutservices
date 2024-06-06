@@ -1,37 +1,31 @@
+// models/Borrower.js
 const mongoose = require('mongoose');
-const { Schema } = mongoose;
 
-const AssignedBookSchema = new Schema({
-  bookId: { type: Schema.Types.ObjectId, ref: 'Book' },
-  assignedDate: { type: Date, default: Date.now },
-  dueDate: { type: Date, required: true }, // Due date field
-  returnDate: { type: Date }, // Return date field
+const borrowerSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  assignedBooks: [{
+    bookId: { type: mongoose.Schema.Types.ObjectId, ref: 'Book' },
+    assignedDate: Date,
+    dueDate: Date,
+  }],
+  fine: { type: Number, default: 0 },
 });
 
-const BorrowerSchema = new Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true },
-  assignedBooks: [AssignedBookSchema],
-});
-
-BorrowerSchema.methods.calculateFine = function(bookId) {
+borrowerSchema.methods.calculateFine = function(bookId) {
   const assignedBook = this.assignedBooks.find(book => book.bookId.equals(bookId));
-  if (!assignedBook) {
-    throw new Error('Book not assigned to this borrower');
-  }
+  if (!assignedBook) return 0;
 
-  if (!assignedBook.returnDate) {
-    assignedBook.returnDate = new Date(); // Use current date if return date is not set
-  }
-
+  const today = new Date();
   const dueDate = assignedBook.dueDate;
-  const returnDate = assignedBook.returnDate;
-  const overdueDays = Math.max(0, Math.ceil((returnDate - dueDate) / (1000 * 60 * 60 * 24)));
-  const fineRate = 0.50; // Example fine rate per day
-
+  const overdueDays = Math.max(0, Math.ceil((today - dueDate) / (1000 * 60 * 60 * 24)));
+  
+  console.log(`Today's date: ${today}`);
+  console.log(`Due date: ${dueDate}`);
+  console.log(`Overdue days: ${overdueDays}`);
+  
+  const fineRate = 1; // Define your fine rate here
   return overdueDays * fineRate;
 };
 
-const Borrower = mongoose.model('Borrower', BorrowerSchema);
-
-module.exports = Borrower;
+module.exports = mongoose.model('Borrower', borrowerSchema);

@@ -84,23 +84,22 @@ async function fnccheckInBook(borrowerId, bookId) {
   if (!borrower) {
     throw new Error('Borrower not found');
   }
-  borrower.assignedBooks = borrower.assignedBooks.filter(book => !book.bookId.equals(bookId));
-  await borrower.save();
-  return borrower;
-}
-
-// Calculate fine for a borrower
-async function fnccalculateFine(borrowerId, bookId) {
-  const borrower = await Borrower.findById(borrowerId).populate('assignedBooks.bookId').exec();
-  if (!borrower) {
-    throw new Error('Borrower not found');
-  }
   const assignedBook = borrower.assignedBooks.find(book => book.bookId.equals(bookId));
   if (!assignedBook) {
     throw new Error('Book not assigned to this borrower');
   }
+
+  // Calculate fine
   const fine = borrower.calculateFine(bookId);
-  return fine;
+  borrower.fine += fine;
+
+  console.log(`Fine calculated: ${fine}`);
+
+  // Remove the book from assignedBooks
+  borrower.assignedBooks = borrower.assignedBooks.filter(book => !book.bookId.equals(bookId));
+  await borrower.save();
+
+  return { borrower, fine };
 }
 
 module.exports = {
@@ -109,6 +108,5 @@ module.exports = {
   fncgetAllBorrowers,
   fncupdateBorrower,
   fncassignBookToBorrower,
-  fnccheckInBook,
-  fnccalculateFine,
+  fnccheckInBook
 };

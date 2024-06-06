@@ -61,21 +61,21 @@ router.post('/:borrowerId/assign/:bookId', async (req, res) => {
 // Check in a book
 router.post('/:borrowerId/checkin/:bookId', async (req, res) => {
   try {
-    const borrower = await borrowerService.fnccheckInBook(req.params.borrowerId, req.params.bookId);
-    res.json(borrower);
+    const { borrowerId, bookId } = req.params;
+    const { borrower, fine } = await borrowerService.fnccheckInBook(borrowerId, bookId);
+    res.json({ borrower, fine });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
-
 // Calculate fine for a borrower
-router.post('/:borrowerId/fine/:bookId', async (req, res) => {
+/*router.post('/:borrowerId/fine/:bookId', async (req, res) => {
   try {
     const fine = await borrowerService.fnccalculateFine(req.params.borrowerId, req.params.bookId);
     res.json({ fine });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-});
+});*/
 
 module.exports = router;
