@@ -188,6 +188,28 @@ function getCategoryFineRate(category) {
   return fineRates[category] || fineRates['other'];
 }
 
+async function fncgetAllBooksInInventory() {
+  return await Book.find({ quantity: { $gt: 0 } }); // Find books with quantity greater than 0
+}
+
+async function fncaddBookToInventory(bookData) {
+  const book = new Book(bookData);
+  await book.save();
+  return book;
+}
+
+async function fncupdateBookQuantity(bookId, quantity) {
+  const book = await Book.findByIdAndUpdate(bookId, { quantity }, { new: true });
+  if (!book) {
+    throw new Error('Book not found');
+  }
+  return book;
+}
+
+
+
+
+
 module.exports = {
   fnccreateBook,
   fncupdateBook,
@@ -200,5 +222,8 @@ module.exports = {
   fnccalculateFine,
   fnccalculateFineByBorrowingId,
   fncupdateOneBook,
+  fncgetAllBooksInInventory,
+  fncaddBookToInventory,
+  fncupdateBookQuantity,
   fncupdateManyBooks
 };

@@ -127,6 +127,37 @@ router.post('/calculatefine/:borrowingId', async (req, res, next) => {
   }
 });
 
+router.get('/inventory', async (req, res) => {
+  try {
+    const books = await bookService.getAllBooksInInventory();
+    res.json(books);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Add new book to inventory
+router.post('/inventory', async (req, res) => {
+  try {
+    const newBook = await bookService.addBookToInventory(req.body);
+    res.status(201).json(newBook);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Update book quantity in inventory
+router.patch('/inventory/:bookId', async (req, res) => {
+  try {
+    const updatedBook = await bookService.updateBookQuantity(req.params.bookId, req.body.quantity);
+    res.json(updatedBook);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+
+
 // Update one book (PATCH)
 router.patch('/update-one', async (req, res) => {
   try {
