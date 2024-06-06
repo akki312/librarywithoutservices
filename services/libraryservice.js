@@ -86,18 +86,12 @@ async function fnccountBooksByAuthor(author) {
 }
 
 async function fncgetBooksAndCountByAuthor(author, page, limit) {
-  /*let chat = await chatModel
-  .find({ from: { $in: [to, from] }, to: { $in: [to, from] } })
-  .select({ __v: 0, _id: 0 })
-  .sort({ created: -1 })
-  .skip(parseInt(page) * parseInt(size))
-  .limit(parseInt(size));*/
   try {
     const books = await Book.find({ author })
       .populate('borrower') 
-      .sort(sort)
-      .skip((page - 1) * limit)
-      .limit(limit);
+      .sort({ created: -1 }) // Sort order updated to match the given format
+      .skip(parseInt(page) * parseInt(limit))
+      .limit(parseInt(limit));
 
     const count = await Book.countDocuments({ author });
     return { books, count, currentPage: page, totalPages: Math.ceil(count / limit) };
@@ -105,6 +99,7 @@ async function fncgetBooksAndCountByAuthor(author, page, limit) {
     throw new Error(`Error fetching books and count by author: ${error.message}`);
   }
 }
+
 
 async function fnccountBooksByAuthorAndCategory(author) {
   try {
