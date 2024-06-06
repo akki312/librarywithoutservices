@@ -86,6 +86,12 @@ async function fnccountBooksByAuthor(author) {
 }
 
 async function fncgetBooksAndCountByAuthor(author, page, limit) {
+  /*let chat = await chatModel
+  .find({ from: { $in: [to, from] }, to: { $in: [to, from] } })
+  .select({ __v: 0, _id: 0 })
+  .sort({ created: -1 })
+  .skip(parseInt(page) * parseInt(size))
+  .limit(parseInt(size));*/
   try {
     const books = await Book.find({ author })
       .populate('borrower') 
