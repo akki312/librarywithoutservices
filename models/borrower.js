@@ -10,7 +10,13 @@ const borrowerSchema = new mongoose.Schema({
     dueDate: Date,
   }],
   fine: { type: Number, default: 0 },
+  reviews: [{
+    rating: { type: Number, required: true },
+    comment: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
+  }],
 });
+
 
 borrowerSchema.methods.calculateFine = function(bookId) {
   const assignedBook = this.assignedBooks.find(book => book.bookId.equals(bookId));
@@ -27,5 +33,7 @@ borrowerSchema.methods.calculateFine = function(bookId) {
   const fineRate = 1; // Define your fine rate here
   return overdueDays * fineRate;
 };
+
+
 
 module.exports = mongoose.model('Borrower', borrowerSchema);

@@ -49,7 +49,7 @@ router.put('/updateborrower/:id', async (req, res) => {
 });
 
 // Assign a book to a borrower
-router.post('/:borrowerId/assign/:bookId', async (req, res) => {
+router.post('/:borrowerId/Assign/:bookId', async (req, res) => {
   try {
     const borrower = await borrowerService.fncassignBookToBorrower(req.params.borrowerId, req.params.bookId);
     res.json(borrower);
@@ -59,7 +59,7 @@ router.post('/:borrowerId/assign/:bookId', async (req, res) => {
 });
 
 // Check in a book
-router.post('/:borrowerId/checkin/:bookId', async (req, res) => {
+router.post('/:borrowerId/Checkin/:bookId', async (req, res) => {
   try {
     const { borrowerId, bookId } = req.params;
     const { borrower, fine } = await borrowerService.fnccheckInBook(borrowerId, bookId);

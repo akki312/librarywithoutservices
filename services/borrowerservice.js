@@ -78,6 +78,23 @@ async function fncassignBookToBorrower(borrowerId, bookId) {
   };
 }
 
+// Submit review function
+async function submitReview(borrowerId, rating, comment) {
+  const borrower = await Borrower.findById(borrowerId);
+  if (!borrower) {
+    throw new Error('Borrower not found');
+  }
+
+  // Add the review to the borrower document
+  borrower.reviews.push({ rating, comment });
+  await borrower.save();
+
+  return borrower;
+}
+
+
+
+
 // Check in a book
 async function fnccheckInBook(borrowerId, bookId) {
   const borrower = await Borrower.findById(borrowerId).populate('assignedBooks.bookId').exec();
