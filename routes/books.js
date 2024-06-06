@@ -55,7 +55,7 @@ router.get('/getallbooks', async (req, res) => {
 });
 
 // Count books by author
-router.get('/count-books-by-author/:author', async (req, res) => {
+router.get('/countBooksByAuthor', async (req, res) => {
   try {
     const count = await libraryService.fnccountBooksByAuthor(req.params.author);
     res.json({ author: req.params.author, count });

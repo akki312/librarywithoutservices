@@ -85,10 +85,10 @@ async function fnccountBooksByAuthor(author) {
   }
 }
 
-async function fncgetBooksAndCountByAuthor(author, page = 1, limit = 10, sort = 'title') {
+async function fncgetBooksAndCountByAuthor(author, page, limit) {
   try {
     const books = await Book.find({ author })
-      .populate('borrower')
+      .populate('borrower') 
       .sort(sort)
       .skip((page - 1) * limit)
       .limit(limit);
