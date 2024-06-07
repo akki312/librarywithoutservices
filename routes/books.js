@@ -179,6 +179,15 @@ router.patch('/update-many', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+(async () => {
+  try {
+    const aggregatedData = await fncaggregateBooks();
+    console.log('Aggregated Data:', aggregatedData);
+  } catch (error) {
+    console.error(error.message);
+  }
+})();
+
 
 router.use(errorHandler);
 module.exports = router;
