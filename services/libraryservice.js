@@ -206,7 +206,49 @@ async function fncupdateBookQuantity(bookId, quantity) {
   return book;
 }
 
-
+async function fncaggregateBooks() {
+  try {
+    const result = await Book.aggregate([
+      {
+        $group: {
+          _id: {
+            author: '$author',
+            category: '$category'
+          },
+          totalBooks: { $sum: 1 },
+          averageRating: { $avg: '$rating' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'authors',
+          localField: '_id.author',
+          foreignField: 'name',
+          as: 'authorDetails'
+        }
+      },
+      {
+        $unwind: '$authorDetails'
+      },
+      {
+        $project: {
+          author: '$_id.author',
+          category: '$_id.category',
+          totalBooks: 1,
+          averageRating: 1,
+          authorDetails: 1,
+          _id: 0
+        }
+      },
+      {
+        $sort: { author: 1, category: 1 }
+      }
+    ]);
+    return result;
+  } catch (error) {
+    throw new Error(`Error aggregating books: ${error.message}`);
+  }
+}
 
 
 
@@ -225,5 +267,6 @@ module.exports = {
   fncgetAllBooksInInventory,
   fncaddBookToInventory,
   fncupdateBookQuantity,
-  fncupdateManyBooks
+  fncupdateManyBooks,
+  fncaggregateBooks
 };

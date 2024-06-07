@@ -179,14 +179,14 @@ router.patch('/update-many', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-(async () => {
+router.get('/aggregate-books', async (req, res) => {
   try {
-    const aggregatedData = await fncaggregateBooks();
-    console.log('Aggregated Data:', aggregatedData);
-  } catch (error) {
-    console.error(error.message);
+    const aggregatedData = await libraryService.fncaggregateBooks();
+    res.json(aggregatedData);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-})();
+});
 
 
 router.use(errorHandler);
