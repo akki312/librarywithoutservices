@@ -92,9 +92,6 @@ async function submitReview(borrowerId, rating, comment) {
   return borrower;
 }
 
-
-
-
 // Check in a book
 async function fnccheckInBook(borrowerId, bookId) {
   const borrower = await Borrower.findById(borrowerId).populate('assignedBooks.bookId').exec();
@@ -119,11 +116,38 @@ async function fnccheckInBook(borrowerId, bookId) {
   return { borrower, fine };
 }
 
+// Aggregate borrowers
+async function fncaggregateBorrowers() {
+  const results = await Borrower.aggregate([
+    {
+      $unwind: '$assignedBooks'
+    },
+    {
+      $lookup: {
+        from: 'books',
+        localField: 'assignedBooks.bookId',
+        foreignField: '_id',
+        as: 'bookDetails'
+      }
+    },
+    {
+      $group: {
+        _id: '$name',
+        totalBooksBorrowed: { $sum: 1 },
+        averageFine: { $avg: '$fine' }
+      }
+    }
+  ]);
+  return results;
+}
+
 module.exports = {
   fnccreateBorrower,
   fncgetBorrowerById,
   fncgetAllBorrowers,
   fncupdateBorrower,
   fncassignBookToBorrower,
-  fnccheckInBook
+  fnccheckInBook,
+  fncaggregateBorrowers,
+  submitReview
 };

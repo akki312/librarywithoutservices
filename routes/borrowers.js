@@ -58,6 +58,20 @@ router.post('/:borrowerId/Assign/:bookId', async (req, res) => {
   }
 });
 
+router.post('/:borrowerId/review', async (req, res) => {
+  try {
+    const { borrowerId } = req.params;
+    const { rating, comment } = req.body;
+
+    const borrower = await borrowerService.submitReview(borrowerId, rating, comment);
+
+    res.json(borrower);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
 // Check in a book
 router.post('/:borrowerId/Checkin/:bookId', async (req, res) => {
   try {
@@ -68,6 +82,7 @@ router.post('/:borrowerId/Checkin/:bookId', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 // Calculate fine for a borrower
 /*router.post('/:borrowerId/fine/:bookId', async (req, res) => {
   try {
