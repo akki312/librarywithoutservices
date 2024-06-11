@@ -83,6 +83,16 @@ router.post('/:borrowerId/Checkin/:bookId', async (req, res) => {
   }
 });
 
+router.get('/borrowers/deep-aggregation', async (req, res) => {
+  try {
+    const results = await borrowerService.fncdeepAggregateBorrowers();
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
 // Calculate fine for a borrower
 /*router.post('/:borrowerId/fine/:bookId', async (req, res) => {
   try {

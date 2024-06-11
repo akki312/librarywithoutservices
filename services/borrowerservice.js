@@ -141,6 +141,62 @@ async function fncaggregateBorrowers() {
   return results;
 }
 
+async function fncdeepAggregateBorrowers() {
+  try {
+    const results = await Borrower.aggregate([
+      {
+        $lookup: {
+          from: 'books',
+          localField: 'assignedBooks.bookId',
+          foreignField: '_id',
+          as: 'bookDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$bookDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $group: {
+          _id: '$name',
+          totalBooksBorrowed: { $sum: 1 },
+          averageFine: { $avg: '$fine' },
+          books: { $push: '$bookDetails' }
+        }
+      },
+      {
+        $addFields: {
+          totalFine: { $multiply: ['$averageFine', '$totalBooksBorrowed'] }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          name: '$_id',
+          totalBooksBorrowed: 1,
+          averageFine: 1,
+          totalFine: 1,
+          books: {
+            title: 1,
+            genre: 1,
+            publishedDate: 1
+          }
+        }
+      },
+      {
+        $sort: { name: 1 }
+      }
+    ]);
+    return results;
+  } catch (error) {
+    throw new Error(`Error during deep aggregation: ${error.message}`);
+  }
+}
+
+
+
 module.exports = {
   fnccreateBorrower,
   fncgetBorrowerById,
@@ -149,5 +205,6 @@ module.exports = {
   fncassignBookToBorrower,
   fnccheckInBook,
   fncaggregateBorrowers,
-  submitReview
+  submitReview,
+  fncdeepAggregateBorrowers
 };
