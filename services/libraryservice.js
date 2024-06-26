@@ -50,9 +50,11 @@ async function fncgetAllBooks(page = 1, limit = 10, sort = 'title') {
   try {
 
 /*The populate function in Mongoose is used
- to automatically replace the specified paths in the document with document(s) from other collections. 
+ to automatically replace the specified paths in the 
+ document with document(s) from other collections. 
 This is particularly useful for implementing
- references between collections, similar to foreign key relationships in SQL databases.*/
+ references between collections, similar to foreign 
+ key relationships in SQL databases.*/
     const books = await Book.find()
       .populate('borrower')
       .sort(sort)
